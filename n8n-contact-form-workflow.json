@@ -1,0 +1,136 @@
+{
+    "name": "Natural Remedies Contact Form to Google Sheets",
+    "nodes": [
+        {
+            "parameters": {
+                "httpMethod": "POST",
+                "path": "eb77de00-6a1e-41a3-9492-553629f5d448",
+                "responseMode": "onReceived",
+                "responseData": "noData",
+                "options": {}
+            },
+            "id": "webhook-trigger",
+            "name": "Webhook",
+            "type": "n8n-nodes-base.webhook",
+            "typeVersion": 1.1,
+            "position": [
+                200,
+                300
+            ],
+            "webhookId": "eb77de00-6a1e-41a3-9492-553629f5d448"
+        },
+        {
+            "parameters": {
+                "keepOnlySet": true,
+                "values": {
+                    "string": [
+                        {
+                            "name": "firstName",
+                            "value": "={{$json.body.firstName}}"
+                        },
+                        {
+                            "name": "lastName",
+                            "value": "={{$json.body.lastName}}"
+                        },
+                        {
+                            "name": "email",
+                            "value": "={{$json.body.email}}"
+                        },
+                        {
+                            "name": "phone",
+                            "value": "={{$json.body.phone}}"
+                        },
+                        {
+                            "name": "country",
+                            "value": "={{$json.body.country}}"
+                        },
+                        {
+                            "name": "role",
+                            "value": "={{$json.body.role}}"
+                        },
+                        {
+                            "name": "interest",
+                            "value": "={{$json.body.interest}}"
+                        },
+                        {
+                            "name": "message",
+                            "value": "={{$json.body.message}}"
+                        },
+                        {
+                            "name": "submittedAt",
+                            "value": "={{$json.body.submittedAt}}"
+                        },
+                        {
+                            "name": "source",
+                            "value": "={{$json.body.source}}"
+                        }
+                    ]
+                },
+                "options": {}
+            },
+            "id": "extract-fields",
+            "name": "Extract Form Fields",
+            "type": "n8n-nodes-base.set",
+            "typeVersion": 2,
+            "position": [
+                420,
+                300
+            ]
+        },
+        {
+            "parameters": {
+                "operation": "append",
+                "documentId": {
+                    "__rl": true,
+                    "value": "ENTER_YOUR_SHEET_ID_HERE",
+                    "mode": "id"
+                },
+                "sheetName": {
+                    "__rl": true,
+                    "value": "Sheet1",
+                    "mode": "name"
+                },
+                "columns": {
+                    "mappingMode": "autoMapInputData"
+                },
+                "options": {}
+            },
+            "id": "google-sheets",
+            "name": "Google Sheets",
+            "type": "n8n-nodes-base.googleSheets",
+            "typeVersion": 4,
+            "position": [
+                640,
+                300
+            ]
+        }
+    ],
+    "connections": {
+        "Webhook": {
+            "main": [
+                [
+                    {
+                        "node": "Extract Form Fields",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        },
+        "Extract Form Fields": {
+            "main": [
+                [
+                    {
+                        "node": "Google Sheets",
+                        "type": "main",
+                        "index": 0
+                    }
+                ]
+            ]
+        }
+    },
+    "settings": {
+        "executionOrder": "v1"
+    },
+    "versionId": "f79e8a7d-b5b6-4b55-a249-13867c4ecff3"
+}
