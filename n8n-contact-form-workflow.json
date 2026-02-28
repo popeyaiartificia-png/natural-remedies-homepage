@@ -58,7 +58,7 @@
                         },
                         {
                             "name": "submittedAt",
-                            "value": "={{$json.body.submittedAt}}"
+                            "value": "={{ $now.setZone('Asia/Kolkata').toFormat('yyyy-MM-dd HH:mm:ss') }}"
                         },
                         {
                             "name": "source",
