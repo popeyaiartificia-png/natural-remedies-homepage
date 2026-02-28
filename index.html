@@ -11,6 +11,10 @@
   <!-- GSAP + ScrollTrigger -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- Spline Viewer Web Component -->
+  <script type="module" src="https://unpkg.com/@splinetool/viewer/build/spline-viewer.js"></script>
+  <!-- Preload Demo Spline Scene -->
+  <link rel="preload" href="https://prod.spline.design/qB-dM3vA3C-gOfuH/scene.splinecode" as="fetch" crossorigin>
   <!-- Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <!-- Google Fonts -->
@@ -23,26 +27,31 @@
   <style>
     /* ─── TOKENS ──────────────────────────────────────────────────────── */
     :root {
-      --green-deep: #0a351e;
-      /* Lighter than #062514 */
-      --green-mid: #156236;
-      /* Lighter than #0e4a28 */
-      --green-bright: #229952;
-      /* Lighter than #1a7a40 */
-      --green-light: #3dd670;
-      /* Lighter than #2fb05a */
+      --green-deep: #1A4C31;
+      /* Lighter, vibrant green instead of dark green */
+      --green-mid: #2E7D32;
+      /* Richer mid green */
+      --green-bright: #4CAF50;
+      /* Fresh, bright leaf green */
+      --green-light: #81C784;
+      /* Soft, light pastel green */
       --gold: #d49c36;
-      /* Slightly brighter gold */
       --gold-light: #f2c77d;
       --amber: #eb8444;
       --blue-accent: #217ba3;
-      --cream: #f9f5f0;
+      --cream: #F8FAF8;
+      /* Hint of white/cream */
       --white: #ffffff;
-      --glass-bg: rgba(255, 255, 255, 0.08);
-      /* Slightly more opaque glass */
-      --glass-border: rgba(255, 255, 255, 0.15);
-      --text-faint: rgba(255, 255, 255, 0.55);
-      --text-mid: rgba(255, 255, 255, 0.75);
+      --glass-bg: rgba(255, 255, 255, 0.15);
+      /* More opaque glass for lighter theme */
+      --glass-border: rgba(255, 255, 255, 0.25);
+      --text-faint: rgba(255, 255, 255, 0.70);
+      /* Increased readability */
+      --text-mid: rgba(255, 255, 255, 0.85);
+      --section-light: #f0fdf4;
+      /* Light green/white background for contrast sections */
+      --text-dark: #1A4C31;
+      /* Dark text for light sections */
     }
 
     *,
@@ -95,6 +104,42 @@
       opacity: .55;
     }
 
+    /* ─── SPLINE 3D CSS ───────────────────────────────────────────────── */
+    .spline-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      contain: strict;
+      pointer-events: all;
+      opacity: 0;
+      transition: opacity 1.5s ease;
+    }
+
+    .spline-bg.loaded {
+      opacity: 0.6;
+    }
+
+    .spline-fallback {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background: var(--green-deep);
+      display: block;
+      transition: opacity 1s ease;
+    }
+
+    .content-wrapper {
+      position: relative;
+      z-index: 1;
+      background-color: transparent;
+    }
+
     /* ─── LOADER ──────────────────────────────────────────────────────── */
     #loader {
       position: fixed;
@@ -105,7 +150,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 22px;
+      gap: 12px;
     }
 
     .l-logo {
@@ -166,7 +211,8 @@
     .lang-bar {
       background: rgba(0, 0, 0, .25);
       border-bottom: 1px solid rgba(255, 255, 255, .06);
-      padding: 7px 6vw;
+      padding: 6px 6vw;
+      /* Adjusted padding */
       display: flex;
       justify-content: flex-end;
       align-items: center;
@@ -200,7 +246,8 @@
     /* ─── NAV ─────────────────────────────────────────────────────────── */
     nav {
       position: fixed;
-      top: 0;
+      top: 36px;
+      /* Adjusted top position */
       left: 0;
       right: 0;
       z-index: 1000;
@@ -1946,6 +1993,107 @@
       gap: 13px;
     }
 
+    /* ─── CERTIFICATIONS ──────────────────────────────────────────────── */
+    #certifications {
+      padding: 100px 0;
+      background: var(--section-light);
+      color: var(--text-dark);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Used generated cert bg */
+    .cert-bg {
+      position: absolute;
+      inset: 0;
+      background-image: url('./assets/certifications_bg.png');
+      /* Ensure this matches your asset path */
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      opacity: 0.15;
+      z-index: 0;
+    }
+
+    .cert-content {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 0 6vw;
+    }
+
+    .cert-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(32px, 3.8vw, 54px);
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .cert-header h2 em {
+      font-style: italic;
+      color: var(--green-bright);
+    }
+
+    .cert-header p {
+      color: rgba(26, 76, 49, 0.7);
+      font-size: 16px;
+      margin-bottom: 60px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .cert-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 30px;
+    }
+
+    .cert-card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(26, 76, 49, 0.1);
+      border-radius: 20px;
+      padding: 40px 20px;
+      transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+      cursor: crosshair;
+    }
+
+    .cert-card:hover {
+      transform: translateY(-10px) rotateX(10deg) rotateY(-5deg);
+      box-shadow: 0 20px 40px rgba(26, 76, 49, 0.15);
+      border-color: var(--green-light);
+    }
+
+    .cert-icon {
+      width: 70px;
+      height: 70px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, var(--green-light), var(--green-bright));
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 30px;
+      font-weight: bold;
+      font-family: serif;
+    }
+
+    .cert-card h4 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--text-dark);
+    }
+
+    .cert-card p {
+      font-size: 13px;
+      color: rgba(26, 76, 49, 0.6);
+    }
+
     /* ─── CONTACT FORM ────────────────────────────────────────────────── */
     #contact {
       position: relative;
@@ -2260,6 +2408,29 @@
       background: #020e06;
       padding: 80px 6vw 32px;
       border-top: 1px solid rgba(255, 255, 255, .05);
+      position: relative;
+      background-image: url('./assets/parallax_bg.png');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    footer::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(4, 27, 14, 0.85);
+      /* Overlay to ensure text readability */
+      z-index: 0;
+    }
+
+    footer .footer-grid,
+    footer .footer-bottom {
+      position: relative;
+      z-index: 1;
     }
 
     .footer-grid {
@@ -2415,7 +2586,7 @@
       }
 
       .insight-card-main {
-        grid-column: span 2;
+        grid-column: span 1;
       }
 
       .footer-grid {
@@ -2776,1406 +2947,1529 @@
 
 <body>
 
-  <!-- CURSOR -->
-  <div id="cursor"></div>
-  <div id="cursor-ring"></div>
+  <!-- Spline Fallback -->
+  <div class="spline-fallback" id="spline-fallback"></div>
 
-  <!-- LOADER -->
-  <div id="loader">
-    <div class="brand-logo loader-logo">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 22C12 22 20 16 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 16 12 22 12 22Z"
-          fill="url(#logo-grad1)" />
-        <path d="M12 22C12 22 4 16 4 10C4 5.58172 7.58172 2 12 2V22Z" fill="#2FB05A" />
-        <path d="M12 15C12 15 15.5 11.5 15.5 8C15.5 5.5 14 4 12 4V15Z" fill="#C9902A" />
-        <defs>
-          <linearGradient id="logo-grad1" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#0E4A28" />
-            <stop offset="1" stop-color="#2FB05A" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <div class="logo-text">Natural<span>Remedies</span></div>
-    </div>
-    <div class="l-bar">
-      <div class="l-fill"></div>
-    </div>
-    <div class="l-sub">Leading Innovations In Animal Nutrition &amp; Healthcare</div>
+  <!-- Spline Background Integration -->
+  <div class="spline-bg" id="spline-bg">
+    <spline-viewer url="https://prod.spline.design/RkYt6VzEXL86UjN2/scene.splinecode" events-target="global"
+      id="spline-viewer"></spline-viewer>
   </div>
 
-  <!-- LANG BAR -->
-  <div class="lang-bar" style="padding-top:6px;padding-bottom:6px;">
-    <div class="lang-selector">🌐 Language (20+ Countries) ▾</div>
-  </div>
+  <div class="content-wrapper">
 
-  <!-- NAV -->
-  <nav id="navbar" style="top:36px;">
-    <a href="#" class="nav-logo nav-brand-wrap">
-      <div class="brand-logo">
-        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 22C12 22 20 16 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 16 12 22 12 22Z"
-            fill="url(#logo-grad2)" />
-          <path d="M12 22C12 22 4 16 4 10C4 5.58172 7.58172 2 12 2V22Z" fill="#2FB05A" />
-          <path d="M12 15C12 15 15.5 11.5 15.5 8C15.5 5.5 14 4 12 4V15Z" fill="#C9902A" />
-          <defs>
-            <linearGradient id="logo-grad2" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
-              <stop stop-color="#0E4A28" />
-              <stop offset="1" stop-color="#2FB05A" />
-            </linearGradient>
-          </defs>
-        </svg>
-        <div class="logo-text">Natural<span>Remedies</span></div>
-      </div>
-    </a>
-    <ul class="nav-links">
-      <li><a href="#about">About</a></li>
-      <li class="nav-dropdown">
-        <a href="#focus">Products ▾</a>
-        <div class="nav-dropdown-menu">
-          <a href="#focus">🐄 Ruminants</a>
-          <a href="#focus">🐔 Monogastrics</a>
-          <a href="#products">🌿 Phytogenics</a>
-          <a href="#verticals">🐾 Pet Care</a>
-        </div>
-      </li>
-      <li><a href="#rnd">Innovation</a></li>
-      <li><a href="#events">Events</a></li>
-      <li><a href="#insights">Insights</a></li>
-      <li><a href="#contact" class="nav-cta">Contact Us</a></li>
-    </ul>
-    <button class="nav-burger" id="nav-burger" aria-label="Toggle navigation">
-      <span></span><span></span><span></span>
-    </button>
-  </nav>
+    <!-- CURSOR -->
+    <div id="cursor"></div>
+    <div id="cursor-ring"></div>
 
-  <!-- ══════════════ HERO ══════════════ -->
-  <section id="hero">
-    <canvas id="three-canvas"></canvas>
 
-    <!-- Full-bleed background photo (lush green farmland) -->
-    <div class="hero-bg-photo">
-      <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1920&q=80" alt=""
-        loading="eager" />
+
+    <!-- LANG BAR -->
+    <div class="lang-bar" style="padding-top:6px;padding-bottom:6px;">
+      <div class="lang-selector">🌐 Language (20+ Countries) ▾</div>
     </div>
 
-    <div class="hero-mesh"></div>
-
-    <!-- Hero right-side photo panel (replaces/overlays Spline) -->
-    <div class="hero-spline"
-      style="display:flex;flex-direction:column;gap:16px;padding:20px;overflow:hidden;border-radius:0 0 0 60px;background:none;">
-      <div style="flex:1.2;border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5);position:relative;">
-        <img src="https://images.unsplash.com/photo-1484557985045-edf25e08da73?auto=format&fit=crop&w=900&q=85"
-          alt="Dairy cattle herd"
-          style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;" />
-        <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(6,37,20,.45),transparent 60%);">
-        </div>
-      </div>
-      <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-        <div style="border-radius:20px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);position:relative;">
-          <img src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=500&q=85"
-            alt="Poultry flock" style="width:100%;height:100%;object-fit:cover;display:block;" />
-          <div
-            style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(6,37,20,.7));display:flex;align-items:flex-end;padding:14px;">
-            <span
-              style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.8);">Monogastrics</span>
-          </div>
-        </div>
-        <div style="border-radius:20px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);position:relative;">
-          <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=500&q=85"
-            alt="R&D Laboratory" style="width:100%;height:100%;object-fit:cover;display:block;" />
-          <div
-            style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(6,37,20,.7));display:flex;align-items:flex-end;padding:14px;">
-            <span
-              style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.8);">Innovation</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="hero-content">
-      <div class="hero-badge" id="hbadge">
-        <div class="badge-dot"></div>
-        30+ Years · Phytogenics Pioneers
-      </div>
-      <h1 class="hero-h1" id="hh1">
-        Leading <em>Innovations</em><br />In Animal Nutrition<br />&amp; Healthcare
-      </h1>
-      <div class="hero-tagline" id="htagline">"We harness nature and apply science for health and happiness
-        sustainably."</div>
-      <p class="hero-sub" id="hsub">
-        Pioneers in phytogenics — standardized botanical powders and extracts delivering proven health outcomes for
-        ruminants and monogastrics across 45+ countries.
-      </p>
-      <div class="hero-actions" id="hactions">
-        <a href="#focus" class="btn-primary">
-          Explore Solutions
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round" />
+    <!-- NAV -->
+    <nav id="navbar" style="top:36px;">
+      <a href="#" class="nav-logo nav-brand-wrap">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 22C12 22 20 16 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 16 12 22 12 22Z"
+              fill="url(#logo-grad2)" />
+            <path d="M12 22C12 22 4 16 4 10C4 5.58172 7.58172 2 12 2V22Z" fill="#2FB05A" />
+            <path d="M12 15C12 15 15.5 11.5 15.5 8C15.5 5.5 14 4 12 4V15Z" fill="#C9902A" />
+            <defs>
+              <linearGradient id="logo-grad2" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+                <stop stop-color="#0E4A28" />
+                <stop offset="1" stop-color="#2FB05A" />
+              </linearGradient>
+            </defs>
           </svg>
-        </a>
-        <a href="#rnd" class="btn-outline">
-          Our Innovation Centre
-          <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
-            <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
-              stroke-linejoin="round" />
-          </svg>
-        </a>
-      </div>
-    </div>
-
-    <div class="hero-stats" id="hstats">
-      <div class="h-stat">
-        <h3 id="sc1">0+</h3>
-        <p>Years Experience</p>
-      </div>
-      <div class="stat-div"></div>
-      <div class="h-stat">
-        <h3 id="sc2">0+</h3>
-        <p>Countries</p>
-      </div>
-      <div class="stat-div"></div>
-      <div class="h-stat">
-        <h3 id="sc3">0+</h3>
-        <p>Product Range</p>
-      </div>
-      <div class="stat-div"></div>
-      <div class="h-stat">
-        <h3 id="sc4">0</h3>
-        <p>Languages Supported</p>
-      </div>
-    </div>
-    <div class="scroll-cue">
-      <div class="scroll-line"></div>Scroll
-    </div>
-  </section>
-
-  <!-- MARQUEE -->
-  <div class="marquee-wrap">
-    <div class="marquee-inner">
-      <div class="m-item"><span>🌿</span> Phytogenics Specialists</div>
-      <div class="m-item"><span>🐄</span> Ruminant Health Solutions</div>
-      <div class="m-item"><span>🐔</span> Monogastric Nutrition</div>
-      <div class="m-item"><span>🔬</span> World-Class R&amp;D Centre</div>
-      <div class="m-item"><span>🌍</span> Present in 45+ Countries</div>
-      <div class="m-item"><span>📋</span> Ayurveda-Backed Science</div>
-      <div class="m-item"><span>♻️</span> Sustainability Committed</div>
-      <div class="m-item"><span>🏆</span> 30+ Years of Excellence</div>
-      <div class="m-item"><span>🌿</span> Phytogenics Specialists</div>
-      <div class="m-item"><span>🐄</span> Ruminant Health Solutions</div>
-      <div class="m-item"><span>🐔</span> Monogastric Nutrition</div>
-      <div class="m-item"><span>🔬</span> World-Class R&amp;D Centre</div>
-      <div class="m-item"><span>🌍</span> Present in 45+ Countries</div>
-      <div class="m-item"><span>📋</span> Ayurveda-Backed Science</div>
-      <div class="m-item"><span>♻️</span> Sustainability Committed</div>
-      <div class="m-item"><span>🏆</span> 30+ Years of Excellence</div>
-    </div>
-  </div>
-
-  <!-- ══════════════ ABOUT ══════════════ -->
-  <section id="about">
-    <div class="mesh"></div>
-    <div class="s-inner">
-      <div class="about-grid">
-        <div class="about-visual reveal">
-          <div class="av-card av-main" id="av3d">
-            <img src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=700&q=85"
-              alt="Cattle grazing in green pasture" class="av-photo" />
+          <div class="logo-text">Natural<span>Remedies</span></div>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li class="nav-dropdown">
+          <a href="#focus">Products ▾</a>
+          <div class="nav-dropdown-menu">
+            <a href="#focus">🐄 Ruminants</a>
+            <a href="#focus">🐔 Monogastrics</a>
+            <a href="#products">🌿 Phytogenics</a>
+            <a href="#verticals">🐾 Pet Care</a>
           </div>
-          <div class="av-card av-badge">
-            <h4>30+</h4>
-            <p>Years of Expertise</p>
-          </div>
-          <div class="av-tag">
-            45+ Countries
-            <span>Global Presence</span>
+        </li>
+        <li><a href="#rnd">Innovation</a></li>
+        <li><a href="#events">Events</a></li>
+        <li><a href="#insights">Insights</a></li>
+        <li><a href="#contact" class="nav-cta">Contact Us</a></li>
+      </ul>
+      <button class="nav-burger" id="nav-burger" aria-label="Toggle navigation">
+        <span></span><span></span><span></span>
+      </button>
+    </nav>
+
+    <!-- ══════════════ HERO ══════════════ -->
+    <section id="hero">
+      <canvas id="three-canvas"></canvas>
+
+      <!-- Full-bleed background photo (lush green farmland) -->
+      <div class="hero-bg-photo">
+        <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1920&q=80" alt=""
+          loading="eager" />
+      </div>
+
+      <div class="hero-mesh"></div>
+
+      <!-- Hero right-side photo panel (replaces/overlays Spline) -->
+      <div class="hero-spline"
+        style="display:flex;flex-direction:column;gap:16px;padding:20px;overflow:hidden;border-radius:0 0 0 60px;background:none;">
+        <div
+          style="flex:1.2;border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5);position:relative;">
+          <img src="https://images.unsplash.com/photo-1484557985045-edf25e08da73?auto=format&fit=crop&w=900&q=85"
+            alt="Dairy cattle herd"
+            style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;" />
+          <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(6,37,20,.45),transparent 60%);">
           </div>
         </div>
-        <div class="about-text">
-          <div class="s-label reveal">Our Story</div>
-          <h2 class="reveal rd1">
-            <em>Three Decades</em> of<br />Animal Health Innovation
-          </h2>
-          <p class="mission-quote reveal rd2">
-            "We harness nature and apply science for health and happiness sustainably."
-          </p>
-          <p class="reveal rd2">
-            Natural Remedies is a global animal healthcare company with over three decades of experience. We focus on
-            innovating and developing natural solutions for veterinarians and livestock producers to facilitate
-            profitable farming practices.
-          </p>
-          <p class="reveal rd3">
-            Our solutions are deeply rooted in the Indian system of medicine — Ayurveda — backed by rigorous
-            research-based science. We are pioneers in phytogenics, specializing in standardized botanical powders and
-            extracts that offer a high margin of safety and efficacy for target animal species.
-          </p>
-          <div class="about-pillars reveal rd3">
-            <div class="pillar">
-              <div class="pillar-icon">🌿</div>
-              <h4>Phytogenics</h4>
-              <p>Standardized botanical extracts for proven animal health outcomes.</p>
+        <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div style="border-radius:20px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);position:relative;">
+            <img src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=500&q=85"
+              alt="Poultry flock" style="width:100%;height:100%;object-fit:cover;display:block;" />
+            <div
+              style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(6,37,20,.7));display:flex;align-items:flex-end;padding:14px;">
+              <span
+                style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.8);">Monogastrics</span>
             </div>
-            <div class="pillar">
-              <div class="pillar-icon">🔬</div>
-              <h4>Science-Backed</h4>
-              <p>Transcriptome analysis and polyherbal formulation research.</p>
-            </div>
-            <div class="pillar">
-              <div class="pillar-icon">📋</div>
-              <h4>Ayurvedic Roots</h4>
-              <p>Ancient Indian medicine meeting modern veterinary science.</p>
-            </div>
-            <div class="pillar">
-              <div class="pillar-icon">🌱</div>
-              <h4>Sustainability</h4>
-              <p>Committed to ecological farming and natural alternatives to synthetics.</p>
+          </div>
+          <div style="border-radius:20px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);position:relative;">
+            <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=500&q=85"
+              alt="R&D Laboratory" style="width:100%;height:100%;object-fit:cover;display:block;" />
+            <div
+              style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(6,37,20,.7));display:flex;align-items:flex-end;padding:14px;">
+              <span
+                style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.8);">Innovation</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </section>
 
-  <!-- ══════════════ FOCUS AREAS ══════════════ -->
-  <section id="focus">
-    <div class="s-inner">
-      <div class="focus-header">
-        <div class="s-label reveal" style="justify-content:center;">Core Focus Areas</div>
-        <h2 class="reveal rd1">Targeted Solutions for<br /><em>Every Animal Category</em></h2>
-        <p class="reveal rd2">From cattle and dairy cows to poultry and swine — our phytogenic solutions are
-          scientifically formulated for each species' unique nutritional and health requirements.</p>
-      </div>
-      <div class="focus-grid">
-        <!-- Ruminants -->
-        <div class="focus-card card-ruminant reveal">
-          <div class="fc-photo">
-            <img src="https://images.unsplash.com/photo-1484557985045-edf25e08da73?auto=format&fit=crop&w=800&q=80"
-              alt="Dairy cattle herd" loading="lazy" />
-          </div>
-          <div class="fc-bg">🐄</div>
-          <div class="fc-glow"></div>
-          <div class="fc-content">
-            <div class="fc-icon">🐄</div>
-            <div class="fc-tag">Ruminants</div>
-            <h3>Ruminant Health &amp; Nutrition</h3>
-            <p>Comprehensive phytogenic solutions for cattle, dairy cows, sheep, and goats. Optimise rumen function,
-              milk production, and reproductive performance.</p>
-            <a href="#" class="fc-link">View Products →</a>
-          </div>
+      <div class="hero-content">
+        <div class="hero-badge" id="hbadge">
+          <div class="badge-dot"></div>
+          30+ Years · Phytogenics Pioneers
         </div>
-        <!-- Monogastrics -->
-        <div class="focus-card card-mono reveal rd1">
-          <div class="fc-photo">
-            <img src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80"
-              alt="Free-range poultry flock" loading="lazy" />
-          </div>
-          <div class="fc-bg">🐔</div>
-          <div class="fc-glow"></div>
-          <div class="fc-content">
-            <div class="fc-icon">🐔</div>
-            <div class="fc-tag">Monogastrics</div>
-            <h3>Poultry &amp; Swine Solutions</h3>
-            <p>Targeted nutrition and health programmes for broilers, layers, breeders, and pigs. Improve FCR, gut
-              health, and immunity without antibiotics.</p>
-            <a href="#" class="fc-link">View Products →</a>
-          </div>
-        </div>
-        <!-- Sustainability -->
-        <div class="focus-card card-sustain reveal rd2">
-          <div class="fc-photo">
-            <img src="https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?auto=format&fit=crop&w=800&q=80"
-              alt="Sustainable green farmland" loading="lazy" />
-          </div>
-          <div class="fc-bg">♻️</div>
-          <div class="fc-glow"></div>
-          <div class="fc-content">
-            <div class="fc-icon">♻️</div>
-            <div class="fc-tag">Sustainability Journey</div>
-            <h3>Our Sustainability Commitment</h3>
-            <p>Driving profitable farming practices while minimising environmental footprint. Our plant-based
-              alternatives replace synthetic additives responsibly.</p>
-            <a href="#" class="fc-link">Learn More →</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════ R&D / INNOVATION ══════════════ -->
-  <section id="rnd">
-    <div class="mesh"></div>
-    <div class="s-inner">
-      <div class="rnd-grid">
-        <div class="rnd-text">
-          <div class="s-label reveal">Innovation Centre</div>
-          <h2 class="reveal rd1">Natural Remedies<br /><em>Innovation Centre</em></h2>
-          <p class="reveal rd2">Our world-class R&amp;D centre leads robust scientific evaluations — from transcriptome
-            analysis to evaluating polyherbal formulations as substitutes for synthetic alternatives like synthetic
-            choline chloride.</p>
-          <p class="reveal rd3">Every product is the outcome of rigorous scientific inquiry, validated through multiple
-            study designs and peer review, before reaching the hands of veterinarians and livestock producers worldwide.
-          </p>
-          <div class="rnd-items reveal rd3">
-            <div class="rnd-item">
-              <div class="rnd-item-icon">📊</div>
-              <div>
-                <h4>Research Bulletins</h4>
-                <p>In-depth technical bulletins on phytogenic efficacy, dosing, and species response data.</p>
-              </div>
-            </div>
-            <div class="rnd-item">
-              <div class="rnd-item-icon">🧬</div>
-              <div>
-                <h4>Technical Case Studies</h4>
-                <p>Real-world farm trials demonstrating measurable improvements in production parameters.</p>
-              </div>
-            </div>
-            <div class="rnd-item">
-              <div class="rnd-item-icon">📝</div>
-              <div>
-                <h4>Research Articles</h4>
-                <p>Peer-reviewed publications validating the science behind every formulation.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="rnd-visual reveal rd1">
-          <div class="rnd-main-card">
-            <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=900&q=85"
-              alt="Natural Remedies Innovation Centre Laboratory" class="rnd-card-photo" loading="lazy" />
-            <h3>R&amp;D Highlights</h3>
-            <div class="rnd-subtitle">Natural Remedies Innovation Centre · Bangalore</div>
-            <div class="rnd-stats-grid">
-              <div class="rnd-stat">
-                <h4>500+</h4>
-                <p>Studies Conducted</p>
-              </div>
-              <div class="rnd-stat">
-                <h4>30+</h4>
-                <p>Years Research</p>
-              </div>
-              <div class="rnd-stat">
-                <h4>45+</h4>
-                <p>Countries Validated</p>
-              </div>
-              <div class="rnd-stat">
-                <h4>100+</h4>
-                <p>Products Developed</p>
-              </div>
-            </div>
-            <div class="rnd-papers">
-              <a href="#" class="rnd-paper">
-                <span class="rnd-paper-icon">📄</span>
-                Phytocee — Vitamin C Alternative in Poultry
-                <span class="rnd-paper-badge">PDF</span>
-              </a>
-              <a href="#" class="rnd-paper">
-                <span class="rnd-paper-icon">📄</span>
-                Kolin Plus — Polyherbal Choline Chloride Study
-                <span class="rnd-paper-badge">PDF</span>
-              </a>
-              <a href="#" class="rnd-paper">
-                <span class="rnd-paper-icon">📄</span>
-                Coccidiosis Management in Broilers — Field Trial
-                <span class="rnd-paper-badge">PDF</span>
-              </a>
-              <a href="#" class="rnd-paper">
-                <span class="rnd-paper-icon">📄</span>
-                Non-GMO Feed Safety — Verification Protocol
-                <span class="rnd-paper-badge">PDF</span>
-              </a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════ PRODUCTS / PHYTOGENICS ══════════════ -->
-  <section id="products">
-    <div class="s-inner">
-      <div class="products-header">
-        <div class="s-label reveal" style="justify-content:center;">Our Product Range</div>
-        <h2 class="reveal rd1">Phytogenic Solutions<br /><em>Backed by Science</em></h2>
-        <p class="reveal rd2">Standardized botanical powders and extracts offering a high margin of safety, consistent
-          potency, and measurable efficacy for your livestock operation.</p>
-      </div>
-      <div class="products-grid">
-        <!-- Wide card -->
-        <div class="prod-card prod-card-wide reveal"
-          style="background:linear-gradient(145deg,rgba(47,176,90,.15),rgba(4,27,14,.95));">
-          <div class="prod-card-header">
-            <div class="prod-icon" style="background:linear-gradient(135deg,rgba(47,176,90,.3),rgba(14,74,40,.5));">🌿
-            </div>
-            <div>
-              <div class="prod-name">Phytogenic Feed Additives</div>
-              <div class="prod-tag">Core Range · Ruminants &amp; Monogastrics</div>
-            </div>
-          </div>
-          <div class="prod-desc">Our flagship phytogenic range — standardized botanical extracts formulated for
-            consistent bioavailability and measurable performance gains. A natural, safe alternative to synthetic feed
-            additives.</div>
-          <div class="prod-benefits">
-            <span class="prod-chip">Gut Health</span>
-            <span class="prod-chip">FCR Improvement</span>
-            <span class="prod-chip">Antibiotic Alternative</span>
-            <span class="prod-chip">Standardized Extracts</span>
-            <span class="prod-chip">Species-Specific</span>
-          </div>
-        </div>
-
-        <div class="prod-card reveal rd1">
-          <div class="prod-card-header">
-            <div class="prod-icon" style="background:linear-gradient(135deg,rgba(212,116,58,.25),rgba(120,50,10,.4));">
-              🐔</div>
-            <div>
-              <div class="prod-name">Phytocee</div>
-              <div class="prod-tag">Poultry · Vitamin C Alternative</div>
-            </div>
-          </div>
-          <div class="prod-desc">Natural Vitamin C source for poultry, reducing oxidative stress and improving flock
-            immunity under heat and disease challenge.</div>
-          <div class="prod-benefits">
-            <span class="prod-chip"
-              style="background:rgba(212,116,58,.12);color:#f0a870;border-color:rgba(212,116,58,.3);">Immunity</span>
-            <span class="prod-chip"
-              style="background:rgba(212,116,58,.12);color:#f0a870;border-color:rgba(212,116,58,.3);">Antioxidant</span>
-          </div>
-        </div>
-
-        <div class="prod-card reveal rd2">
-          <div class="prod-card-header">
-            <div class="prod-icon" style="background:linear-gradient(135deg,rgba(201,144,42,.25),rgba(120,80,10,.4));">
-              ⚗️</div>
-            <div>
-              <div class="prod-name">Kolin Plus</div>
-              <div class="prod-tag">Poultry · Choline Supplement</div>
-            </div>
-          </div>
-          <div class="prod-desc">Polyherbal choline chloride replacement — eliminating the hygroscopic effects of
-            synthetic choline while supporting liver function and production.</div>
-          <div class="prod-benefits">
-            <span class="prod-chip"
-              style="background:rgba(201,144,42,.15);color:var(--gold-light);border-color:rgba(201,144,42,.3);">Liver
-              Support</span>
-            <span class="prod-chip"
-              style="background:rgba(201,144,42,.15);color:var(--gold-light);border-color:rgba(201,144,42,.3);">Non-Hygroscopic</span>
-          </div>
-        </div>
-
-        <div class="prod-card reveal rd1">
-          <div class="prod-card-header">
-            <div class="prod-icon" style="background:linear-gradient(135deg,rgba(47,176,90,.25),rgba(14,74,40,.5));">🐄
-            </div>
-            <div>
-              <div class="prod-name">Ruminant Botanicals</div>
-              <div class="prod-tag">Cattle · Dairy · Sheep · Goats</div>
-            </div>
-          </div>
-          <div class="prod-desc">Phytogenic blends to optimise rumen microbiome, improve milk yield, and support
-            reproductive efficiency in dairy and beef herds.</div>
-          <div class="prod-benefits">
-            <span class="prod-chip">Milk Yield</span>
-            <span class="prod-chip">Rumen Health</span>
-          </div>
-        </div>
-
-        <div class="prod-card reveal rd2">
-          <div class="prod-card-header">
-            <div class="prod-icon" style="background:linear-gradient(135deg,rgba(26,96,128,.3),rgba(6,37,60,.5));">🛡️
-            </div>
-            <div>
-              <div class="prod-name">Immunity &amp; Gut Range</div>
-              <div class="prod-tag">Broad-Spectrum · All Species</div>
-            </div>
-          </div>
-          <div class="prod-desc">Herbal immunomodulators and gut conditioners addressing coccidiosis, respiratory
-            challenges, and dysbiosis without antibiotic resistance risk.</div>
-          <div class="prod-benefits">
-            <span class="prod-chip"
-              style="background:rgba(26,96,128,.18);color:#7acff0;border-color:rgba(26,96,128,.3);">Coccidiosis</span>
-            <span class="prod-chip"
-              style="background:rgba(26,96,128,.18);color:#7acff0;border-color:rgba(26,96,128,.3);">AMR-Free</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════ EVENTS ══════════════ -->
-  <section id="events">
-    <div class="s-inner">
-      <div class="events-header">
-        <div class="s-label reveal" style="justify-content:center;">Industry Engagement</div>
-        <h2 class="reveal rd1">Events &amp; <em>Summits</em></h2>
-        <p class="reveal rd2" style="color:var(--text-faint);font-size:15px;line-height:1.7;font-weight:300;">Connecting
-          veterinarians, farmers, and livestock producers through education, innovation showcases, and peer learning.
+        <h1 class="hero-h1" id="hh1">
+          Leading <em>Innovations</em><br />In Animal Nutrition<br />&amp; Healthcare
+        </h1>
+        <div class="hero-tagline" id="htagline">"We harness nature and apply science for health and happiness
+          sustainably."</div>
+        <p class="hero-sub" id="hsub">
+          Pioneers in phytogenics — standardized botanical powders and extracts delivering proven health outcomes for
+          ruminants and monogastrics across 45+ countries.
         </p>
-      </div>
-      <div class="events-grid">
-        <!-- Featured upcoming event -->
-        <div class="event-card ec-upcoming reveal">
-          <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80"
-            alt="International Farmers Summit" class="ec-photo" loading="lazy" />
-          <div class="ec-top">
-            <div class="ec-type">Upcoming Event</div>
-            <h3>International Farmers Summit 2026</h3>
-            <p>A landmark gathering of veterinarians, livestock producers, and agribusiness leaders — exploring the
-              future of natural animal nutrition, sustainable farming, and phytogenic solutions. Featuring keynotes,
-              live product demonstrations, and research presentations from our Innovation Centre.</p>
-          </div>
-          <div class="ec-meta">
-            <div class="ec-meta-item"><span>📅</span> 2026 · Date TBC</div>
-            <div class="ec-meta-item"><span>📍</span> India (Venue TBC)</div>
-            <div class="ec-meta-item"><span>👥</span> Open to All Stakeholders</div>
-          </div>
-        </div>
-        <!-- Sidebar past/small events -->
-        <div class="events-sidebar">
-          <div class="event-mini ec-past reveal rd1">
-            <div class="em-date">Past Event · 2025</div>
-            <h4>12th Kolkata International Poultry Fair</h4>
-            <p>Showcased latest phytogenic solutions for broilers and layers.</p>
-          </div>
-          <div class="event-mini ec-past reveal rd2">
-            <div class="em-date">Past Event · 2025</div>
-            <h4>VIV Asia — Bangkok</h4>
-            <p>Presented Phytocee and gut health portfolio to Southeast Asian markets.</p>
-          </div>
-          <div class="event-mini ec-past reveal rd3">
-            <div class="em-date">Past Event · 2024</div>
-            <h4>EuroTier — Hannover</h4>
-            <p>Natural alternatives to antibiotics in European livestock production.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════ INSIGHTS / BLOGS ══════════════ -->
-  <section id="insights">
-    <div class="mesh"></div>
-    <div class="s-inner">
-      <div class="insights-header">
-        <div class="s-label reveal">Blogs &amp; Insights</div>
-        <h2 class="reveal rd1">Latest <em>Knowledge</em><br />From Our Experts</h2>
-        <p class="reveal rd2">Continuous updates on animal healthcare trends, feed safety, disease management, and the
-          science of phytogenics — for veterinarians and producers.</p>
-      </div>
-      <div class="insights-grid">
-        <!-- Main blog -->
-        <div class="insight-card insight-card-main reveal">
-          <div class="ic-img">
-            <img src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=900&q=85"
-              alt="Poultry flock — coccidiosis management" loading="lazy" />
-          </div>
-          <div class="ic-body">
-            <div class="ic-cat">Poultry Care</div>
-            <h3>Managing Coccidiosis in Poultry: The Phytogenic Approach</h3>
-            <p>Coccidiosis remains one of the most economically devastating diseases in poultry. Our field trials
-              demonstrate how standardized herbal formulations can reduce oocyst shedding and mortality without
-              ionophore resistance risk.</p>
-            <div class="ic-meta">
-              <span>5 min read · Research Article</span>
-              <a href="#" class="ic-read">Read More →</a>
-            </div>
-          </div>
-        </div>
-        <!-- Side blogs -->
-        <div class="insight-card reveal rd1">
-          <div class="ic-img" style="height:160px;">
-            <img src="https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80"
-              alt="Feed science laboratory" loading="lazy" />
-          </div>
-          <div class="ic-body">
-            <div class="ic-cat">Feed Science</div>
-            <h3>Choline Chloride's Hygroscopic Effects &amp; Natural Alternatives</h3>
-            <p>Synthetic choline chloride degrades vitamins in premixes. Discover how Kolin Plus eliminates this
-              problem.</p>
-            <div class="ic-meta">
-              <span>4 min read</span>
-              <a href="#" class="ic-read">Read →</a>
-            </div>
-          </div>
-        </div>
-        <div class="insight-card reveal rd2">
-          <div class="ic-img" style="height:160px;">
-            <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80"
-              alt="Grain and non-GMO feed crops" loading="lazy" />
-          </div>
-          <div class="ic-body">
-            <div class="ic-cat">Non-GMO</div>
-            <h3>Non-GMO Feed Certification: What Producers Need to Know</h3>
-            <p>A practical guide to verification, documentation, and market access for Non-GMO certified livestock
-              products.</p>
-            <div class="ic-meta">
-              <span>3 min read</span>
-              <a href="#" class="ic-read">Read →</a>
-            </div>
-          </div>
-        </div>
-        <div class="insight-card reveal rd1">
-          <div class="ic-img" style="height:160px;">
-            <img src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=600&q=80"
-              alt="Dairy cattle in green pasture" loading="lazy" />
-          </div>
-          <div class="ic-body">
-            <div class="ic-cat">Dairy Health</div>
-            <h3>Improving Milk Yield with Phytogenic Rumen Modulators</h3>
-            <p>A 90-day field study across 12 dairy farms shows a 12% improvement in milk yield using our botanical
-              blend.</p>
-            <div class="ic-meta">
-              <span>6 min read</span>
-              <a href="#" class="ic-read">Read →</a>
-            </div>
-          </div>
-        </div>
-        <div class="insight-card reveal rd2">
-          <div class="ic-img" style="height:160px;">
-            <img src="https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=600&q=80"
-              alt="Microscope research transcriptome analysis" loading="lazy" />
-          </div>
-          <div class="ic-body">
-            <div class="ic-cat">Research</div>
-            <h3>Transcriptome Analysis: Unlocking Herbal Mode of Action</h3>
-            <p>How gene-expression profiling is helping us understand exactly how phytogenics modulate immune response.
-            </p>
-            <div class="ic-meta">
-              <span>7 min read</span>
-              <a href="#" class="ic-read">Read →</a>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════ GLOBAL REACH ══════════════ -->
-  <section id="global">
-    <div class="s-inner">
-      <div class="global-inner">
-        <div class="global-text">
-          <div class="s-label reveal">Global Presence</div>
-          <h2 class="reveal rd1">Trusted by Farmers<br />Across <em>45+ Countries</em></h2>
-          <p class="reveal rd2">From India to Europe, from Southeast Asia to the Americas — our products and solutions
-            have proven their worth in diverse climates, farming systems, and regulatory environments.</p>
-          <p class="reveal rd3">Our vast global logistics and distribution network ensures that veterinarians and
-            livestock producers receive consistent-quality phytogenic solutions wherever they farm.</p>
-          <div class="global-stats">
-            <div class="gs-item reveal rd1">
-              <h3 id="gc1">0+</h3>
-              <p>Countries</p>
-            </div>
-            <div class="gs-item reveal rd2">
-              <h3 id="gc2">0+</h3>
-              <p>Years Experience</p>
-            </div>
-            <div class="gs-item reveal rd3">
-              <h3 id="gc3">0</h3>
-              <p>Languages</p>
-            </div>
-          </div>
-        </div>
-        <div class="globe-visual reveal rd1">
-          <div class="globe-ring gr1"></div>
-          <div class="globe-ring gr2"></div>
-          <div class="globe-ring gr3"></div>
-          <div class="globe-center">🌍</div>
-          <div class="globe-dot gd1"></div>
-          <div class="globe-dot gd2"></div>
-          <div class="globe-dot gd3"></div>
-          <div class="globe-dot gd4"></div>
-          <div class="globe-dot gd5"></div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════ SISTER VERTICALS ══════════════ -->
-  <section id="verticals">
-    <div class="mesh"></div>
-    <div class="s-inner">
-      <div class="vert-header">
-        <div class="s-label reveal" style="justify-content:center;">Our Ecosystem</div>
-        <h2 class="reveal rd1">Natural Solutions Across<br /><em>Every Living Species</em></h2>
-      </div>
-      <div class="vert-grid">
-        <div class="vert-card vert-animal reveal">
-          <span class="vert-icon">🐄</span>
-          <h3>Animal Healthcare</h3>
-          <p>Our core vertical — phytogenic solutions for ruminants and monogastrics, developed at our world-class
-            Innovation Centre in Bangalore.</p>
-          <a href="#focus" class="vert-link">Explore Solutions →</a>
-        </div>
-        <div class="vert-card vert-human reveal rd1">
-          <span class="vert-icon">💊</span>
-          <h3>Human Healthcare</h3>
-          <p>An allied branch delivering natural human healthcare solutions rooted in the same Ayurvedic science and
-            botanical expertise that defines our animal health range.</p>
-          <a href="#" class="vert-link">Visit Human Health →</a>
-        </div>
-        <div class="vert-card vert-pet reveal rd2">
-          <span class="vert-icon">🐾</span>
-          <h3>Pet Care</h3>
-          <p>Holistic and natural products for companion animals — bringing the same rigorous phytogenic science to pet
-            wellness for dogs, cats, and small animals.</p>
-          <a href="#" class="vert-link">Discover Pet Care →</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════ TESTIMONIALS ══════════════ -->
-  <section id="testimonials">
-    <div class="s-inner" style="padding-bottom:60px;">
-      <div class="testi-header">
-        <div class="s-label reveal" style="justify-content:center;">What They Say</div>
-        <h2 class="reveal rd1">Trusted by Veterinarians<br />&amp; <em>Livestock Producers</em></h2>
-      </div>
-    </div>
-    <div style="overflow:hidden;">
-      <div class="testi-track" id="ttrack">
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"Phytocee has reduced mortality in our broiler flocks by 18% over two production cycles. The
-            science behind it is solid."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">👨‍⚕️</div>
-            <div>
-              <div class="t-name">Dr. Rajesh Menon</div>
-              <div class="t-role">Poultry Veterinarian · Kerala, India</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"The Ruminant Botanical blend improved milk yield in our Holstein herd by 11%. Our farmers
-            couldn't believe the difference."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">👩‍🌾</div>
-            <div>
-              <div class="t-name">Maria Santos</div>
-              <div class="t-role">Dairy Farm Manager · São Paulo, Brazil</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"Switching from synthetic choline to Kolin Plus eliminated premix degradation issues entirely.
-            Game-changer for our feed mill."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">🧑‍🔬</div>
-            <div>
-              <div class="t-name">Dr. Ahmed Al-Rashidi</div>
-              <div class="t-role">Feed Mill Nutritionist · Riyadh, KSA</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"In 25 years of practice I've not seen a phytogenic company with this level of R&D rigour. Their
-            case studies are exemplary."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">👴</div>
-            <div>
-              <div class="t-name">Prof. Jan Verwijk</div>
-              <div class="t-role">Animal Nutritionist · Wageningen, Netherlands</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"Our coccidiosis challenge has reduced by 60% since adopting their herbal gut health protocol. No
-            ionophore resistance concerns."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">👩‍⚕️</div>
-            <div>
-              <div class="t-name">Dr. Sunita Patel</div>
-              <div class="t-role">Flock Health Specialist · Gujarat, India</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"Consistently excellent customer support and technical advice. The team at Natural Remedies truly
-            understands farming realities."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">🧔</div>
-            <div>
-              <div class="t-name">Carlos Muñoz</div>
-              <div class="t-role">Livestock Producer · Jalisco, Mexico</div>
-            </div>
-          </div>
-        </div>
-        <!-- Duplicate for loop -->
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"Phytocee has reduced mortality in our broiler flocks by 18% over two production cycles. The
-            science behind it is solid."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">👨‍⚕️</div>
-            <div>
-              <div class="t-name">Dr. Rajesh Menon</div>
-              <div class="t-role">Poultry Veterinarian · Kerala, India</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"The Ruminant Botanical blend improved milk yield in our Holstein herd by 11%. Our farmers
-            couldn't believe the difference."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">👩‍🌾</div>
-            <div>
-              <div class="t-name">Maria Santos</div>
-              <div class="t-role">Dairy Farm Manager · São Paulo, Brazil</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"Switching from synthetic choline to Kolin Plus eliminated premix degradation issues entirely.
-            Game-changer for our feed mill."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">🧑‍🔬</div>
-            <div>
-              <div class="t-name">Dr. Ahmed Al-Rashidi</div>
-              <div class="t-role">Feed Mill Nutritionist · Riyadh, KSA</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"In 25 years of practice I've not seen a phytogenic company with this level of R&D rigour. Their
-            case studies are exemplary."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">👴</div>
-            <div>
-              <div class="t-name">Prof. Jan Verwijk</div>
-              <div class="t-role">Animal Nutritionist · Wageningen, Netherlands</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"Our coccidiosis challenge has reduced by 60% since adopting their herbal gut health protocol. No
-            ionophore resistance concerns."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">👩‍⚕️</div>
-            <div>
-              <div class="t-name">Dr. Sunita Patel</div>
-              <div class="t-role">Flock Health Specialist · Gujarat, India</div>
-            </div>
-          </div>
-        </div>
-        <div class="t-card">
-          <div class="t-stars">★★★★★</div>
-          <blockquote>"Consistently excellent customer support and technical advice. The team at Natural Remedies truly
-            understands farming realities."</blockquote>
-          <div class="t-author">
-            <div class="t-avatar">🧔</div>
-            <div>
-              <div class="t-name">Carlos Muñoz</div>
-              <div class="t-role">Livestock Producer · Jalisco, Mexico</div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════ CONTACT FORM ══════════════ -->
-  <section id="contact">
-    <div class="mesh"></div>
-    <div class="s-inner">
-      <div class="contact-inner">
-        <div class="contact-info">
-          <div class="s-label reveal">Get In Touch</div>
-          <h2 class="reveal rd1">Connect With<br />Our <em>Expert Team</em></h2>
-          <p class="reveal rd2">Whether you're a veterinarian seeking technical guidance, a producer looking for
-            solutions, or a distributor interested in partnership — our team is ready to support you.</p>
-          <div class="contact-detail reveal rd2">
-            <div class="cd-icon">🏢</div>
-            <div>
-              <div class="cd-label">Corporate Headquarters</div>
-              <div class="cd-value">Electronic City, Bangalore<br />Karnataka, India</div>
-            </div>
-          </div>
-          <div class="contact-detail reveal rd3">
-            <div class="cd-icon">🏭</div>
-            <div>
-              <div class="cd-label">Manufacturing Facilities</div>
-              <div class="cd-value">Krishnagiri District, Tamil Nadu<br />Pithampur, Dhar District, Madhya Pradesh</div>
-            </div>
-          </div>
-          <div class="contact-detail reveal rd3">
-            <div class="cd-icon">🌐</div>
-            <div>
-              <div class="cd-label">Global Distribution</div>
-              <div class="cd-value">45+ Countries Worldwide<br />20+ Languages Supported</div>
-            </div>
-          </div>
-          <div class="contact-detail reveal rd4">
-            <div class="cd-icon">📱</div>
-            <div>
-              <div class="cd-label">Follow Us</div>
-              <div class="cd-value" style="display:flex;gap:10px;margin-top:4px;">
-                <a href="#" class="f-social" style="color:var(--white);">📘</a>
-                <a href="#" class="f-social" style="color:var(--white);">in</a>
-                <a href="#" class="f-social" style="color:var(--white);">▶</a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- CONTACT FORM (Google Sheets ready) -->
-        <div class="contact-form-wrap reveal rd1">
-          <h3>Send Us a Message</h3>
-          <p class="form-sub">Fill in your details and our team will respond within 24 hours.</p>
-          <div class="form-toast" id="form-toast"></div>
-          <form id="contact-form" novalidate>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="f-firstName">First Name *</label>
-                <input id="f-firstName" type="text" name="firstName" placeholder="Dr. Rajesh" required />
-              </div>
-              <div class="form-group">
-                <label for="f-lastName">Last Name *</label>
-                <input id="f-lastName" type="text" name="lastName" placeholder="Kumar" required />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="f-email">Email Address *</label>
-              <input id="f-email" type="email" name="email" placeholder="your@email.com" required />
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="f-phone">Phone Number</label>
-                <input id="f-phone" type="tel" name="phone" placeholder="+91 9876543210" />
-              </div>
-              <div class="form-group">
-                <label for="f-country">Country</label>
-                <input id="f-country" type="text" name="country" placeholder="India" />
-              </div>
-            </div>
-            <div class="form-group">
-              <label for="f-role">I Am A *</label>
-              <select id="f-role" name="role" required>
-                <option value="" disabled selected>Select your role</option>
-                <option value="Veterinarian">Veterinarian</option>
-                <option value="Livestock Producer">Livestock Producer</option>
-                <option value="Distributor / Dealer">Distributor / Dealer</option>
-                <option value="Feed Mill">Feed Mill</option>
-                <option value="Researcher">Researcher / Academician</option>
-                <option value="Other">Other</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="f-interest">Area of Interest</label>
-              <select id="f-interest" name="interest">
-                <option value="" disabled selected>Select product/topic</option>
-                <option value="Ruminants">Ruminant Products</option>
-                <option value="Monogastrics">Monogastric / Poultry Products</option>
-                <option value="Phytocee">Phytocee</option>
-                <option value="Kolin Plus">Kolin Plus</option>
-                <option value="R&D Collaboration">R&D Collaboration</option>
-                <option value="Distributorship">Distributorship / Partnership</option>
-                <option value="General Enquiry">General Enquiry</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="f-message">Message *</label>
-              <textarea id="f-message" name="message" rows="4"
-                placeholder="Tell us about your farm, challenge, or enquiry..." required></textarea>
-            </div>
-            <!-- Hidden metadata fields -->
-            <input type="hidden" name="submittedAt" id="submittedAt" />
-            <input type="hidden" name="source" value="Landing Page — naturalremedies.com" />
-            <button type="submit" class="form-submit" id="form-btn">
-              Send Message →
-            </button>
-            <p class="form-note">🔒 Your information is secure and will never be shared. By submitting you agree to our
-              Privacy Policy.</p>
-          </form>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════ FOOTER ══════════════ -->
-  <footer>
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <a href="#" class="footer-logo-wrap" style="display:inline-block;">
-          <div class="brand-logo">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 22C12 22 20 16 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 16 12 22 12 22Z"
-                fill="url(#logo-grad3)" />
-              <path d="M12 22C12 22 4 16 4 10C4 5.58172 7.58172 2 12 2V22Z" fill="#2FB05A" />
-              <path d="M12 15C12 15 15.5 11.5 15.5 8C15.5 5.5 14 4 12 4V15Z" fill="#C9902A" />
-              <defs>
-                <linearGradient id="logo-grad3" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
-                  <stop stop-color="#0E4A28" />
-                  <stop offset="1" stop-color="#2FB05A" />
-                </linearGradient>
-              </defs>
+        <div class="hero-actions" id="hactions">
+          <a href="#focus" class="btn-primary">
+            Explore Solutions
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round" />
             </svg>
-            <div class="logo-text">Natural<span>Remedies</span></div>
+          </a>
+          <a href="#rnd" class="btn-outline">
+            Our Innovation Centre
+            <svg width="15" height="15" viewBox="0 0 16 16" fill="none">
+              <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                stroke-linejoin="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-stats" id="hstats">
+        <div class="h-stat">
+          <h3 id="sc1">0+</h3>
+          <p>Years Experience</p>
+        </div>
+        <div class="stat-div"></div>
+        <div class="h-stat">
+          <h3 id="sc2">0+</h3>
+          <p>Countries</p>
+        </div>
+        <div class="stat-div"></div>
+        <div class="h-stat">
+          <h3 id="sc3">0+</h3>
+          <p>Product Range</p>
+        </div>
+        <div class="stat-div"></div>
+        <div class="h-stat">
+          <h3 id="sc4">0</h3>
+          <p>Languages Supported</p>
+        </div>
+      </div>
+      <div class="scroll-cue">
+        <div class="scroll-line"></div>Scroll
+      </div>
+    </section>
+
+    <!-- MARQUEE -->
+    <div class="marquee-wrap">
+      <div class="marquee-inner">
+        <div class="m-item"><span>🌿</span> Phytogenics Specialists</div>
+        <div class="m-item"><span>🐄</span> Ruminant Health Solutions</div>
+        <div class="m-item"><span>🐔</span> Monogastric Nutrition</div>
+        <div class="m-item"><span>🔬</span> World-Class R&amp;D Centre</div>
+        <div class="m-item"><span>🌍</span> Present in 45+ Countries</div>
+        <div class="m-item"><span>📋</span> Ayurveda-Backed Science</div>
+        <div class="m-item"><span>♻️</span> Sustainability Committed</div>
+        <div class="m-item"><span>🏆</span> 30+ Years of Excellence</div>
+        <div class="m-item"><span>🌿</span> Phytogenics Specialists</div>
+        <div class="m-item"><span>🐄</span> Ruminant Health Solutions</div>
+        <div class="m-item"><span>🐔</span> Monogastric Nutrition</div>
+        <div class="m-item"><span>🔬</span> World-Class R&amp;D Centre</div>
+        <div class="m-item"><span>🌍</span> Present in 45+ Countries</div>
+        <div class="m-item"><span>📋</span> Ayurveda-Backed Science</div>
+        <div class="m-item"><span>♻️</span> Sustainability Committed</div>
+        <div class="m-item"><span>🏆</span> 30+ Years of Excellence</div>
+      </div>
+    </div>
+
+    <!-- ══════════════ ABOUT ══════════════ -->
+    <section id="about">
+      <div class="mesh"></div>
+      <div class="s-inner">
+        <div class="about-grid">
+          <div class="about-visual reveal">
+            <div class="av-card av-main" id="av3d">
+              <img src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=700&q=85"
+                alt="Cattle grazing in green pasture" class="av-photo" />
+            </div>
+            <div class="av-card av-badge">
+              <h4>30+</h4>
+              <p>Years of Expertise</p>
+            </div>
+            <div class="av-tag">
+              45+ Countries
+              <span>Global Presence</span>
+            </div>
           </div>
-        </a>
-        <p>Pioneering natural, science-backed animal health solutions for veterinarians and livestock producers across
-          45+ countries for over three decades.</p>
-        <div class="footer-socials">
-          <a href="#" class="f-social">📘</a>
-          <a href="#" class="f-social">in</a>
-          <a href="#" class="f-social">▶</a>
+          <div class="about-text">
+            <div class="s-label reveal">Our Story</div>
+            <h2 class="reveal rd1">
+              <em>Three Decades</em> of<br />Animal Health Innovation
+            </h2>
+            <p class="mission-quote reveal rd2">
+              "We harness nature and apply science for health and happiness sustainably."
+            </p>
+            <p class="reveal rd2">
+              Natural Remedies is a global animal healthcare company with over three decades of experience. We focus on
+              innovating and developing natural solutions for veterinarians and livestock producers to facilitate
+              profitable farming practices.
+            </p>
+            <p class="reveal rd3">
+              Our solutions are deeply rooted in the Indian system of medicine — Ayurveda — backed by rigorous
+              research-based science. We are pioneers in phytogenics, specializing in standardized botanical powders and
+              extracts that offer a high margin of safety and efficacy for target animal species.
+            </p>
+            <div class="about-pillars reveal rd3">
+              <div class="pillar">
+                <div class="pillar-icon">🌿</div>
+                <h4>Phytogenics</h4>
+                <p>Standardized botanical extracts for proven animal health outcomes.</p>
+              </div>
+              <div class="pillar">
+                <div class="pillar-icon">🔬</div>
+                <h4>Science-Backed</h4>
+                <p>Transcriptome analysis and polyherbal formulation research.</p>
+              </div>
+              <div class="pillar">
+                <div class="pillar-icon">📋</div>
+                <h4>Ayurvedic Roots</h4>
+                <p>Ancient Indian medicine meeting modern veterinary science.</p>
+              </div>
+              <div class="pillar">
+                <div class="pillar-icon">🌱</div>
+                <h4>Sustainability</h4>
+                <p>Committed to ecological farming and natural alternatives to synthetics.</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="footer-locations" style="margin-top:22px;">
-          <strong>Headquarters</strong>
-          Electronic City, Bangalore, Karnataka, India
-          <strong style="margin-top:12px;">Factories</strong>
-          Krishnagiri, Tamil Nadu &amp; Pithampur, Madhya Pradesh
+      </div>
+    </section>
+
+    <!-- ══════════════ FOCUS AREAS ══════════════ -->
+    <section id="focus">
+      <div class="s-inner">
+        <div class="focus-header">
+          <div class="s-label reveal" style="justify-content:center;">Core Focus Areas</div>
+          <h2 class="reveal rd1">Targeted Solutions for<br /><em>Every Animal Category</em></h2>
+          <p class="reveal rd2">From cattle and dairy cows to poultry and swine — our phytogenic solutions are
+            scientifically formulated for each species' unique nutritional and health requirements.</p>
+        </div>
+        <div class="focus-grid">
+          <!-- Ruminants -->
+          <div class="focus-card card-ruminant reveal">
+            <div class="fc-photo">
+              <img src="https://images.unsplash.com/photo-1484557985045-edf25e08da73?auto=format&fit=crop&w=800&q=80"
+                alt="Dairy cattle herd" loading="lazy" />
+            </div>
+            <div class="fc-bg">🐄</div>
+            <div class="fc-glow"></div>
+            <div class="fc-content">
+              <div class="fc-icon">🐄</div>
+              <div class="fc-tag">Ruminants</div>
+              <h3>Ruminant Health &amp; Nutrition</h3>
+              <p>Comprehensive phytogenic solutions for cattle, dairy cows, sheep, and goats. Optimise rumen function,
+                milk production, and reproductive performance.</p>
+              <a href="#" class="fc-link">View Products →</a>
+            </div>
+          </div>
+          <!-- Monogastrics -->
+          <div class="focus-card card-mono reveal rd1">
+            <div class="fc-photo">
+              <img src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80"
+                alt="Free-range poultry flock" loading="lazy" />
+            </div>
+            <div class="fc-bg">🐔</div>
+            <div class="fc-glow"></div>
+            <div class="fc-content">
+              <div class="fc-icon">🐔</div>
+              <div class="fc-tag">Monogastrics</div>
+              <h3>Poultry &amp; Swine Solutions</h3>
+              <p>Targeted nutrition and health programmes for broilers, layers, breeders, and pigs. Improve FCR, gut
+                health, and immunity without antibiotics.</p>
+              <a href="#" class="fc-link">View Products →</a>
+            </div>
+          </div>
+          <!-- Sustainability -->
+          <div class="focus-card card-sustain reveal rd2">
+            <div class="fc-photo">
+              <img src="https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?auto=format&fit=crop&w=800&q=80"
+                alt="Sustainable green farmland" loading="lazy" />
+            </div>
+            <div class="fc-bg">♻️</div>
+            <div class="fc-glow"></div>
+            <div class="fc-content">
+              <div class="fc-icon">♻️</div>
+              <div class="fc-tag">Sustainability Journey</div>
+              <h3>Our Sustainability Commitment</h3>
+              <p>Driving profitable farming practices while minimising environmental footprint. Our plant-based
+                alternatives replace synthetic additives responsibly.</p>
+              <a href="#" class="fc-link">Learn More →</a>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="footer-col">
-        <h5>Products</h5>
-        <ul>
-          <li><a href="#">Ruminant Solutions</a></li>
-          <li><a href="#">Monogastric Solutions</a></li>
-          <li><a href="#">Phytocee</a></li>
-          <li><a href="#">Kolin Plus</a></li>
-          <li><a href="#">Gut Health Range</a></li>
-          <li><a href="#">Immunity Support</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>Company</h5>
-        <ul>
-          <li><a href="#">About Us</a></li>
-          <li><a href="#">Innovation Centre</a></li>
-          <li><a href="#">Sustainability</a></li>
-          <li><a href="#">Our Expertise</a></li>
-          <li><a href="#">Careers</a></li>
-          <li><a href="#">Press &amp; Media</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>Resources</h5>
-        <ul>
-          <li><a href="#">Research Bulletins</a></li>
-          <li><a href="#">Technical Case Studies</a></li>
-          <li><a href="#">Research Articles</a></li>
-          <li><a href="#">Blogs &amp; Insights</a></li>
-          <li><a href="#">Events</a></li>
-          <li><a href="#">FAQ</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h5>Support</h5>
-        <ul>
-          <li><a href="#">Contact Us</a></li>
-          <li><a href="#">Customer Support</a></li>
-          <li><a href="#">Find a Distributor</a></li>
-          <li><a href="#">Wholesale / B2B</a></li>
-          <li><a href="#">Privacy Policy</a></li>
-          <li><a href="#">Disclaimer</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2026 Natural Remedies Pvt. Ltd. All rights reserved. · Electronic City, Bangalore, India</span>
-      <span>
-        <a href="#">Customer Support</a> &nbsp;·&nbsp;
-        <a href="#">Privacy Policy</a> &nbsp;·&nbsp;
-        <a href="#">Disclaimer</a>
-      </span>
-    </div>
-  </footer>
+    </section>
 
-  <!-- ══════════════ SCRIPTS ══════════════ -->
-  <script>
-    gsap.registerPlugin(ScrollTrigger);
+    <!-- ══════════════ R&D / INNOVATION ══════════════ -->
+    <section id="rnd">
+      <div class="mesh"></div>
+      <div class="s-inner">
+        <div class="rnd-grid">
+          <div class="rnd-text">
+            <div class="s-label reveal">Innovation Centre</div>
+            <h2 class="reveal rd1">Natural Remedies<br /><em>Innovation Centre</em></h2>
+            <p class="reveal rd2">Our world-class R&amp;D centre leads robust scientific evaluations — from
+              transcriptome
+              analysis to evaluating polyherbal formulations as substitutes for synthetic alternatives like synthetic
+              choline chloride.</p>
+            <p class="reveal rd3">Every product is the outcome of rigorous scientific inquiry, validated through
+              multiple
+              study designs and peer review, before reaching the hands of veterinarians and livestock producers
+              worldwide.
+            </p>
+            <div class="rnd-items reveal rd3">
+              <div class="rnd-item">
+                <div class="rnd-item-icon">📊</div>
+                <div>
+                  <h4>Research Bulletins</h4>
+                  <p>In-depth technical bulletins on phytogenic efficacy, dosing, and species response data.</p>
+                </div>
+              </div>
+              <div class="rnd-item">
+                <div class="rnd-item-icon">🧬</div>
+                <div>
+                  <h4>Technical Case Studies</h4>
+                  <p>Real-world farm trials demonstrating measurable improvements in production parameters.</p>
+                </div>
+              </div>
+              <div class="rnd-item">
+                <div class="rnd-item-icon">📝</div>
+                <div>
+                  <h4>Research Articles</h4>
+                  <p>Peer-reviewed publications validating the science behind every formulation.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="rnd-visual reveal rd1">
+            <div class="rnd-main-card">
+              <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=900&q=85"
+                alt="Natural Remedies Innovation Centre Laboratory" class="rnd-card-photo" loading="lazy" />
+              <h3>R&amp;D Highlights</h3>
+              <div class="rnd-subtitle">Natural Remedies Innovation Centre · Bangalore</div>
+              <div class="rnd-stats-grid">
+                <div class="rnd-stat">
+                  <h4>500+</h4>
+                  <p>Studies Conducted</p>
+                </div>
+                <div class="rnd-stat">
+                  <h4>30+</h4>
+                  <p>Years Research</p>
+                </div>
+                <div class="rnd-stat">
+                  <h4>45+</h4>
+                  <p>Countries Validated</p>
+                </div>
+                <div class="rnd-stat">
+                  <h4>100+</h4>
+                  <p>Products Developed</p>
+                </div>
+              </div>
+              <div class="rnd-papers">
+                <a href="#" class="rnd-paper">
+                  <span class="rnd-paper-icon">📄</span>
+                  Phytocee — Vitamin C Alternative in Poultry
+                  <span class="rnd-paper-badge">PDF</span>
+                </a>
+                <a href="#" class="rnd-paper">
+                  <span class="rnd-paper-icon">📄</span>
+                  Kolin Plus — Polyherbal Choline Chloride Study
+                  <span class="rnd-paper-badge">PDF</span>
+                </a>
+                <a href="#" class="rnd-paper">
+                  <span class="rnd-paper-icon">📄</span>
+                  Coccidiosis Management in Broilers — Field Trial
+                  <span class="rnd-paper-badge">PDF</span>
+                </a>
+                <a href="#" class="rnd-paper">
+                  <span class="rnd-paper-icon">📄</span>
+                  Non-GMO Feed Safety — Verification Protocol
+                  <span class="rnd-paper-badge">PDF</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    /* ─── LOADER ─── */
-    window.addEventListener('load', () => {
-      setTimeout(() => {
-        gsap.to('#loader', {
-          opacity: 0, duration: .7, ease: 'power2.inOut',
-          onComplete: () => { document.getElementById('loader').style.display = 'none'; }
+    <!-- ══════════════ PRODUCTS / PHYTOGENICS ══════════════ -->
+    <section id="products">
+      <div class="s-inner">
+        <div class="products-header">
+          <div class="s-label reveal" style="justify-content:center;">Our Product Range</div>
+          <h2 class="reveal rd1">Phytogenic Solutions<br /><em>Backed by Science</em></h2>
+          <p class="reveal rd2">Standardized botanical powders and extracts offering a high margin of safety, consistent
+            potency, and measurable efficacy for your livestock operation.</p>
+        </div>
+        <div class="products-grid">
+          <!-- Wide card -->
+          <div class="prod-card prod-card-wide reveal"
+            style="background:linear-gradient(145deg,rgba(47,176,90,.15),rgba(4,27,14,.95));">
+            <div class="prod-card-header">
+              <div class="prod-icon" style="background:linear-gradient(135deg,rgba(47,176,90,.3),rgba(14,74,40,.5));">🌿
+              </div>
+              <div>
+                <div class="prod-name">Phytogenic Feed Additives</div>
+                <div class="prod-tag">Core Range · Ruminants &amp; Monogastrics</div>
+              </div>
+            </div>
+            <div class="prod-desc">Our flagship phytogenic range — standardized botanical extracts formulated for
+              consistent bioavailability and measurable performance gains. A natural, safe alternative to synthetic feed
+              additives.</div>
+            <div class="prod-benefits">
+              <span class="prod-chip">Gut Health</span>
+              <span class="prod-chip">FCR Improvement</span>
+              <span class="prod-chip">Antibiotic Alternative</span>
+              <span class="prod-chip">Standardized Extracts</span>
+              <span class="prod-chip">Species-Specific</span>
+            </div>
+          </div>
+
+          <div class="prod-card reveal rd1">
+            <div class="prod-card-header">
+              <div class="prod-icon"
+                style="background:linear-gradient(135deg,rgba(212,116,58,.25),rgba(120,50,10,.4));">
+                🐔</div>
+              <div>
+                <div class="prod-name">Phytocee</div>
+                <div class="prod-tag">Poultry · Vitamin C Alternative</div>
+              </div>
+            </div>
+            <div class="prod-desc">Natural Vitamin C source for poultry, reducing oxidative stress and improving flock
+              immunity under heat and disease challenge.</div>
+            <div class="prod-benefits">
+              <span class="prod-chip"
+                style="background:rgba(212,116,58,.12);color:#f0a870;border-color:rgba(212,116,58,.3);">Immunity</span>
+              <span class="prod-chip"
+                style="background:rgba(212,116,58,.12);color:#f0a870;border-color:rgba(212,116,58,.3);">Antioxidant</span>
+            </div>
+          </div>
+
+          <div class="prod-card reveal rd2">
+            <div class="prod-card-header">
+              <div class="prod-icon"
+                style="background:linear-gradient(135deg,rgba(201,144,42,.25),rgba(120,80,10,.4));">
+                ⚗️</div>
+              <div>
+                <div class="prod-name">Kolin Plus</div>
+                <div class="prod-tag">Poultry · Choline Supplement</div>
+              </div>
+            </div>
+            <div class="prod-desc">Polyherbal choline chloride replacement — eliminating the hygroscopic effects of
+              synthetic choline while supporting liver function and production.</div>
+            <div class="prod-benefits">
+              <span class="prod-chip"
+                style="background:rgba(201,144,42,.15);color:var(--gold-light);border-color:rgba(201,144,42,.3);">Liver
+                Support</span>
+              <span class="prod-chip"
+                style="background:rgba(201,144,42,.15);color:var(--gold-light);border-color:rgba(201,144,42,.3);">Non-Hygroscopic</span>
+            </div>
+          </div>
+
+          <div class="prod-card reveal rd1">
+            <div class="prod-card-header">
+              <div class="prod-icon" style="background:linear-gradient(135deg,rgba(47,176,90,.25),rgba(14,74,40,.5));">
+                🐄
+              </div>
+              <div>
+                <div class="prod-name">Ruminant Botanicals</div>
+                <div class="prod-tag">Cattle · Dairy · Sheep · Goats</div>
+              </div>
+            </div>
+            <div class="prod-desc">Phytogenic blends to optimise rumen microbiome, improve milk yield, and support
+              reproductive efficiency in dairy and beef herds.</div>
+            <div class="prod-benefits">
+              <span class="prod-chip">Milk Yield</span>
+              <span class="prod-chip">Rumen Health</span>
+            </div>
+          </div>
+
+          <div class="prod-card reveal rd2">
+            <div class="prod-card-header">
+              <div class="prod-icon" style="background:linear-gradient(135deg,rgba(26,96,128,.3),rgba(6,37,60,.5));">🛡️
+              </div>
+              <div>
+                <div class="prod-name">Immunity &amp; Gut Range</div>
+                <div class="prod-tag">Broad-Spectrum · All Species</div>
+              </div>
+            </div>
+            <div class="prod-desc">Herbal immunomodulators and gut conditioners addressing coccidiosis, respiratory
+              challenges, and dysbiosis without antibiotic resistance risk.</div>
+            <div class="prod-benefits">
+              <span class="prod-chip"
+                style="background:rgba(26,96,128,.18);color:#7acff0;border-color:rgba(26,96,128,.3);">Coccidiosis</span>
+              <span class="prod-chip"
+                style="background:rgba(26,96,128,.18);color:#7acff0;border-color:rgba(26,96,128,.3);">AMR-Free</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ EVENTS ══════════════ -->
+    <section id="events">
+      <div class="s-inner">
+        <div class="events-header">
+          <div class="s-label reveal" style="justify-content:center;">Industry Engagement</div>
+          <h2 class="reveal rd1">Events &amp; <em>Summits</em></h2>
+          <p class="reveal rd2" style="color:var(--text-faint);font-size:15px;line-height:1.7;font-weight:300;">
+            Connecting
+            veterinarians, farmers, and livestock producers through education, innovation showcases, and peer learning.
+          </p>
+        </div>
+        <div class="events-grid">
+          <!-- Featured upcoming event -->
+          <div class="event-card ec-upcoming reveal">
+            <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80"
+              alt="International Farmers Summit" class="ec-photo" loading="lazy" />
+            <div class="ec-top">
+              <div class="ec-type">Upcoming Event</div>
+              <h3>International Farmers Summit 2026</h3>
+              <p>A landmark gathering of veterinarians, livestock producers, and agribusiness leaders — exploring the
+                future of natural animal nutrition, sustainable farming, and phytogenic solutions. Featuring keynotes,
+                live product demonstrations, and research presentations from our Innovation Centre.</p>
+            </div>
+            <div class="ec-meta">
+              <div class="ec-meta-item"><span>📅</span> 2026 · Date TBC</div>
+              <div class="ec-meta-item"><span>📍</span> India (Venue TBC)</div>
+              <div class="ec-meta-item"><span>👥</span> Open to All Stakeholders</div>
+            </div>
+          </div>
+          <!-- Sidebar past/small events -->
+          <div class="events-sidebar">
+            <div class="event-mini ec-past reveal rd1">
+              <div class="em-date">Past Event · 2025</div>
+              <h4>12th Kolkata International Poultry Fair</h4>
+              <p>Showcased latest phytogenic solutions for broilers and layers.</p>
+            </div>
+            <div class="event-mini ec-past reveal rd2">
+              <div class="em-date">Past Event · 2025</div>
+              <h4>VIV Asia — Bangkok</h4>
+              <p>Presented Phytocee and gut health portfolio to Southeast Asian markets.</p>
+            </div>
+            <div class="event-mini ec-past reveal rd3">
+              <div class="em-date">Past Event · 2024</div>
+              <h4>EuroTier — Hannover</h4>
+              <p>Natural alternatives to antibiotics in European livestock production.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ INSIGHTS / BLOGS ══════════════ -->
+    <section id="insights">
+      <div class="mesh"></div>
+      <div class="s-inner">
+        <div class="insights-header">
+          <div class="s-label reveal">Blogs &amp; Insights</div>
+          <h2 class="reveal rd1">Latest <em>Knowledge</em><br />From Our Experts</h2>
+          <p class="reveal rd2">Continuous updates on animal healthcare trends, feed safety, disease management, and the
+            science of phytogenics — for veterinarians and producers.</p>
+        </div>
+        <div class="insights-grid">
+          <!-- Main blog -->
+          <div class="insight-card insight-card-main reveal">
+            <div class="ic-img">
+              <img src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=900&q=85"
+                alt="Poultry flock — coccidiosis management" loading="lazy" />
+            </div>
+            <div class="ic-body">
+              <div class="ic-cat">Poultry Care</div>
+              <h3>Managing Coccidiosis in Poultry: The Phytogenic Approach</h3>
+              <p>Coccidiosis remains one of the most economically devastating diseases in poultry. Our field trials
+                demonstrate how standardized herbal formulations can reduce oocyst shedding and mortality without
+                ionophore resistance risk.</p>
+              <div class="ic-meta">
+                <span>5 min read · Research Article</span>
+                <a href="#" class="ic-read">Read More →</a>
+              </div>
+            </div>
+          </div>
+          <!-- Side blogs -->
+          <div class="insight-card reveal rd1">
+            <div class="ic-img" style="height:160px;">
+              <img src="https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80"
+                alt="Feed science laboratory" loading="lazy" />
+            </div>
+            <div class="ic-body">
+              <div class="ic-cat">Feed Science</div>
+              <h3>Choline Chloride's Hygroscopic Effects &amp; Natural Alternatives</h3>
+              <p>Synthetic choline chloride degrades vitamins in premixes. Discover how Kolin Plus eliminates this
+                problem.</p>
+              <div class="ic-meta">
+                <span>4 min read</span>
+                <a href="#" class="ic-read">Read →</a>
+              </div>
+            </div>
+          </div>
+          <div class="insight-card reveal rd2">
+            <div class="ic-img" style="height:160px;">
+              <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80"
+                alt="Grain and non-GMO feed crops" loading="lazy" />
+            </div>
+            <div class="ic-body">
+              <div class="ic-cat">Non-GMO</div>
+              <h3>Non-GMO Feed Certification: What Producers Need to Know</h3>
+              <p>A practical guide to verification, documentation, and market access for Non-GMO certified livestock
+                products.</p>
+              <div class="ic-meta">
+                <span>3 min read</span>
+                <a href="#" class="ic-read">Read →</a>
+              </div>
+            </div>
+          </div>
+          <div class="insight-card reveal rd1">
+            <div class="ic-img" style="height:160px;">
+              <img src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=600&q=80"
+                alt="Dairy cattle in green pasture" loading="lazy" />
+            </div>
+            <div class="ic-body">
+              <div class="ic-cat">Dairy Health</div>
+              <h3>Improving Milk Yield with Phytogenic Rumen Modulators</h3>
+              <p>A 90-day field study across 12 dairy farms shows a 12% improvement in milk yield using our botanical
+                blend.</p>
+              <div class="ic-meta">
+                <span>6 min read</span>
+                <a href="#" class="ic-read">Read →</a>
+              </div>
+            </div>
+          </div>
+          <div class="insight-card reveal rd2">
+            <div class="ic-img" style="height:160px;">
+              <img src="https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=600&q=80"
+                alt="Microscope research transcriptome analysis" loading="lazy" />
+            </div>
+            <div class="ic-body">
+              <div class="ic-cat">Research</div>
+              <h3>Transcriptome Analysis: Unlocking Herbal Mode of Action</h3>
+              <p>How gene-expression profiling is helping us understand exactly how phytogenics modulate immune
+                response.
+              </p>
+              <div class="ic-meta">
+                <span>7 min read</span>
+                <a href="#" class="ic-read">Read →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ CERTIFICATIONS ══════════════ -->
+    <section id="certifications">
+      <div class="cert-bg"></div>
+      <div class="s-inner">
+        <div class="cert-header">
+          <div class="s-label reveal" style="justify-content:center;">Quality & Compliance</div>
+          <h2 class="reveal rd1">Global Standards of <br /><em>Excellence</em></h2>
+          <p class="reveal rd2">Our manufacturing and research facilities operate under the highest international
+            quality standards, ensuring safety, consistency, and efficacy in every batch.</p>
+        </div>
+
+        <div class="cert-grid">
+          <!-- ISO Certification -->
+          <div class="cert-card reveal">
+            <div class="cert-icon">🏆</div>
+            <h3>ISO 9001:2015</h3>
+            <p>Quality Management Systems certified for consistent product quality and regulatory compliance.</p>
+          </div>
+
+          <!-- WHO-GMP -->
+          <div class="cert-card reveal rd1">
+            <div class="cert-icon">🏭</div>
+            <h3>WHO-GMP</h3>
+            <p>Manufacturing practices adhering to World Health Organization guidelines for pharmaceutical production.
+            </p>
+          </div>
+
+          <!-- FAMI-QS -->
+          <div class="cert-card reveal rd2">
+            <div class="cert-icon">🛡️</div>
+            <h3>FAMI-QS</h3>
+            <p>Certified Quality and Safety System for Specialty Feed Ingredients and their Mixtures.</p>
+          </div>
+
+          <!-- Non-GMO -->
+          <div class="cert-card reveal rd1">
+            <div class="cert-icon">🌱</div>
+            <h3>Non-GMO Verified</h3>
+            <p>Our botanical ingredients are certified free from genetically modified organisms.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ GLOBAL REACH ══════════════ -->
+    <section id="global">
+      <div class="s-inner">
+        <div class="global-inner">
+          <div class="global-text">
+            <div class="s-label reveal">Global Presence</div>
+            <h2 class="reveal rd1">Trusted by Farmers<br />Across <em>45+ Countries</em></h2>
+            <p class="reveal rd2">From India to Europe, from Southeast Asia to the Americas — our products and solutions
+              have proven their worth in diverse climates, farming systems, and regulatory environments.</p>
+            <p class="reveal rd3">Our vast global logistics and distribution network ensures that veterinarians and
+              livestock producers receive consistent-quality phytogenic solutions wherever they farm.</p>
+            <div class="global-stats">
+              <div class="gs-item reveal rd1">
+                <h3 id="gc1">0+</h3>
+                <p>Countries</p>
+              </div>
+              <div class="gs-item reveal rd2">
+                <h3 id="gc2">0+</h3>
+                <p>Years Experience</p>
+              </div>
+              <div class="gs-item reveal rd3">
+                <h3 id="gc3">0</h3>
+                <p>Languages</p>
+              </div>
+            </div>
+          </div>
+          <div class="globe-visual reveal rd1">
+            <div class="globe-ring gr1"></div>
+            <div class="globe-ring gr2"></div>
+            <div class="globe-ring gr3"></div>
+            <div class="globe-center">🌍</div>
+            <div class="globe-dot gd1"></div>
+            <div class="globe-dot gd2"></div>
+            <div class="globe-dot gd3"></div>
+            <div class="globe-dot gd4"></div>
+            <div class="globe-dot gd5"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ SISTER VERTICALS ══════════════ -->
+    <section id="verticals">
+      <div class="mesh"></div>
+      <div class="s-inner">
+        <div class="vert-header">
+          <div class="s-label reveal" style="justify-content:center;">Our Ecosystem</div>
+          <h2 class="reveal rd1">Natural Solutions Across<br /><em>Every Living Species</em></h2>
+        </div>
+        <div class="vert-grid">
+          <div class="vert-card vert-animal reveal">
+            <span class="vert-icon">🐄</span>
+            <h3>Animal Healthcare</h3>
+            <p>Our core vertical — phytogenic solutions for ruminants and monogastrics, developed at our world-class
+              Innovation Centre in Bangalore.</p>
+            <a href="#focus" class="vert-link">Explore Solutions →</a>
+          </div>
+          <div class="vert-card vert-human reveal rd1">
+            <span class="vert-icon">💊</span>
+            <h3>Human Healthcare</h3>
+            <p>An allied branch delivering natural human healthcare solutions rooted in the same Ayurvedic science and
+              botanical expertise that defines our animal health range.</p>
+            <a href="#" class="vert-link">Visit Human Health →</a>
+          </div>
+          <div class="vert-card vert-pet reveal rd2">
+            <span class="vert-icon">🐾</span>
+            <h3>Pet Care</h3>
+            <p>Holistic and natural products for companion animals — bringing the same rigorous phytogenic science to
+              pet
+              wellness for dogs, cats, and small animals.</p>
+            <a href="#" class="vert-link">Discover Pet Care →</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ TESTIMONIALS ══════════════ -->
+    <section id="testimonials">
+      <div class="s-inner" style="padding-bottom:60px;">
+        <div class="testi-header">
+          <div class="s-label reveal" style="justify-content:center;">What They Say</div>
+          <h2 class="reveal rd1">Trusted by Veterinarians<br />&amp; <em>Livestock Producers</em></h2>
+        </div>
+      </div>
+      <div style="overflow:hidden;">
+        <div class="testi-track" id="ttrack">
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"Phytocee has reduced mortality in our broiler flocks by 18% over two production cycles. The
+              science behind it is solid."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">👨‍⚕️</div>
+              <div>
+                <div class="t-name">Dr. Rajesh Menon</div>
+                <div class="t-role">Poultry Veterinarian · Kerala, India</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"The Ruminant Botanical blend improved milk yield in our Holstein herd by 11%. Our farmers
+              couldn't believe the difference."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">👩‍🌾</div>
+              <div>
+                <div class="t-name">Maria Santos</div>
+                <div class="t-role">Dairy Farm Manager · São Paulo, Brazil</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"Switching from synthetic choline to Kolin Plus eliminated premix degradation issues entirely.
+              Game-changer for our feed mill."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">🧑‍🔬</div>
+              <div>
+                <div class="t-name">Dr. Ahmed Al-Rashidi</div>
+                <div class="t-role">Feed Mill Nutritionist · Riyadh, KSA</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"In 25 years of practice I've not seen a phytogenic company with this level of R&D rigour. Their
+              case studies are exemplary."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">👴</div>
+              <div>
+                <div class="t-name">Prof. Jan Verwijk</div>
+                <div class="t-role">Animal Nutritionist · Wageningen, Netherlands</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"Our coccidiosis challenge has reduced by 60% since adopting their herbal gut health protocol.
+              No
+              ionophore resistance concerns."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">👩‍⚕️</div>
+              <div>
+                <div class="t-name">Dr. Sunita Patel</div>
+                <div class="t-role">Flock Health Specialist · Gujarat, India</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"Consistently excellent customer support and technical advice. The team at Natural Remedies
+              truly
+              understands farming realities."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">🧔</div>
+              <div>
+                <div class="t-name">Carlos Muñoz</div>
+                <div class="t-role">Livestock Producer · Jalisco, Mexico</div>
+              </div>
+            </div>
+          </div>
+          <!-- Duplicate for loop -->
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"Phytocee has reduced mortality in our broiler flocks by 18% over two production cycles. The
+              science behind it is solid."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">👨‍⚕️</div>
+              <div>
+                <div class="t-name">Dr. Rajesh Menon</div>
+                <div class="t-role">Poultry Veterinarian · Kerala, India</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"The Ruminant Botanical blend improved milk yield in our Holstein herd by 11%. Our farmers
+              couldn't believe the difference."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">👩‍🌾</div>
+              <div>
+                <div class="t-name">Maria Santos</div>
+                <div class="t-role">Dairy Farm Manager · São Paulo, Brazil</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"Switching from synthetic choline to Kolin Plus eliminated premix degradation issues entirely.
+              Game-changer for our feed mill."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">🧑‍🔬</div>
+              <div>
+                <div class="t-name">Dr. Ahmed Al-Rashidi</div>
+                <div class="t-role">Feed Mill Nutritionist · Riyadh, KSA</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"In 25 years of practice I've not seen a phytogenic company with this level of R&D rigour. Their
+              case studies are exemplary."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">👴</div>
+              <div>
+                <div class="t-name">Prof. Jan Verwijk</div>
+                <div class="t-role">Animal Nutritionist · Wageningen, Netherlands</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"Our coccidiosis challenge has reduced by 60% since adopting their herbal gut health protocol.
+              No
+              ionophore resistance concerns."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">👩‍⚕️</div>
+              <div>
+                <div class="t-name">Dr. Sunita Patel</div>
+                <div class="t-role">Flock Health Specialist · Gujarat, India</div>
+              </div>
+            </div>
+          </div>
+          <div class="t-card">
+            <div class="t-stars">★★★★★</div>
+            <blockquote>"Consistently excellent customer support and technical advice. The team at Natural Remedies
+              truly
+              understands farming realities."</blockquote>
+            <div class="t-author">
+              <div class="t-avatar">🧔</div>
+              <div>
+                <div class="t-name">Carlos Muñoz</div>
+                <div class="t-role">Livestock Producer · Jalisco, Mexico</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ CONTACT FORM ══════════════ -->
+    <section id="contact">
+      <div class="mesh"></div>
+      <div class="s-inner">
+        <div class="contact-inner">
+          <div class="contact-info">
+            <div class="s-label reveal">Get In Touch</div>
+            <h2 class="reveal rd1">Connect With<br />Our <em>Expert Team</em></h2>
+            <p class="reveal rd2">Whether you're a veterinarian seeking technical guidance, a producer looking for
+              solutions, or a distributor interested in partnership — our team is ready to support you.</p>
+            <div class="contact-detail reveal rd2">
+              <div class="cd-icon">🏢</div>
+              <div>
+                <div class="cd-label">Corporate Headquarters</div>
+                <div class="cd-value" style="max-width:280px;">Plot No. 5B, Veerasandra Industrial Area, 19 th K.M.
+                  Stone, Hosur Road, Electronic City, Bangalore, Karnataka, India – 560 100</div>
+              </div>
+            </div>
+            <div class="contact-detail reveal rd3">
+              <div class="cd-icon">📞</div>
+              <div>
+                <div class="cd-label">Call Us</div>
+                <div class="cd-value">1800-121-8720<br />+91 7022669111</div>
+              </div>
+            </div>
+            <div class="contact-detail reveal rd3">
+              <div class="cd-icon">🌐</div>
+              <div>
+                <div class="cd-label">Global Distribution</div>
+                <div class="cd-value">45+ Countries Worldwide<br />20+ Languages Supported</div>
+              </div>
+            </div>
+            <div class="contact-detail reveal rd4">
+              <div class="cd-icon">📱</div>
+              <div>
+                <div class="cd-label">Follow Us</div>
+                <div class="cd-value" style="display:flex;gap:10px;margin-top:4px;">
+                  <a href="#" class="f-social" style="color:var(--white);">📘</a>
+                  <a href="#" class="f-social" style="color:var(--white);">in</a>
+                  <a href="#" class="f-social" style="color:var(--white);">▶</a>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- CONTACT FORM (Google Sheets ready) -->
+          <div class="contact-form-wrap reveal rd1">
+            <h3>Send Us a Message</h3>
+            <p class="form-sub">Fill in your details and our team will respond within 24 hours.</p>
+            <div class="form-toast" id="form-toast"></div>
+            <form id="contact-form" novalidate>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="f-firstName">First Name *</label>
+                  <input id="f-firstName" type="text" name="firstName" placeholder="Dr. Rajesh" required />
+                </div>
+                <div class="form-group">
+                  <label for="f-lastName">Last Name *</label>
+                  <input id="f-lastName" type="text" name="lastName" placeholder="Kumar" required />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="f-email">Email Address *</label>
+                <input id="f-email" type="email" name="email" placeholder="your@email.com" required />
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="f-phone">Phone Number</label>
+                  <input id="f-phone" type="tel" name="phone" placeholder="+91 9876543210" />
+                </div>
+                <div class="form-group">
+                  <label for="f-country">Country</label>
+                  <input id="f-country" type="text" name="country" placeholder="India" />
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="f-role">I Am A *</label>
+                <select id="f-role" name="role" required>
+                  <option value="" disabled selected>Select your role</option>
+                  <option value="Veterinarian">Veterinarian</option>
+                  <option value="Livestock Producer">Livestock Producer</option>
+                  <option value="Distributor / Dealer">Distributor / Dealer</option>
+                  <option value="Feed Mill">Feed Mill</option>
+                  <option value="Researcher">Researcher / Academician</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="f-interest">Area of Interest</label>
+                <select id="f-interest" name="interest">
+                  <option value="" disabled selected>Select product/topic</option>
+                  <option value="Ruminants">Ruminant Products</option>
+                  <option value="Monogastrics">Monogastric / Poultry Products</option>
+                  <option value="Phytocee">Phytocee</option>
+                  <option value="Kolin Plus">Kolin Plus</option>
+                  <option value="R&D Collaboration">R&D Collaboration</option>
+                  <option value="Distributorship">Distributorship / Partnership</option>
+                  <option value="General Enquiry">General Enquiry</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="f-message">Message *</label>
+                <textarea id="f-message" name="message" rows="4"
+                  placeholder="Tell us about your farm, challenge, or enquiry..." required></textarea>
+              </div>
+              <!-- Hidden metadata fields -->
+              <input type="hidden" name="submittedAt" id="submittedAt" />
+              <input type="hidden" name="source" value="Landing Page — naturalremedies.com" />
+              <button type="submit" class="form-submit" id="form-btn">
+                Send Message →
+              </button>
+              <p class="form-note">🔒 Your information is secure and will never be shared. By submitting you agree to
+                our
+                Privacy Policy.</p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══════════════ FOOTER ══════════════ -->
+    <footer>
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <a href="#" class="footer-logo-wrap" style="display:inline-block;">
+            <div class="brand-logo">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 22C12 22 20 16 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 16 12 22 12 22Z"
+                  fill="url(#logo-grad3)" />
+                <path d="M12 22C12 22 4 16 4 10C4 5.58172 7.58172 2 12 2V22Z" fill="#2FB05A" />
+                <path d="M12 15C12 15 15.5 11.5 15.5 8C15.5 5.5 14 4 12 4V15Z" fill="#C9902A" />
+                <defs>
+                  <linearGradient id="logo-grad3" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#0E4A28" />
+                    <stop offset="1" stop-color="#2FB05A" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <div class="logo-text">Natural<span>Remedies</span></div>
+            </div>
+          </a>
+          <p>Pioneering natural, science-backed animal health solutions for veterinarians and livestock producers across
+            45+ countries for over three decades.</p>
+          <div class="footer-socials">
+            <a href="#" class="f-social">📘</a>
+            <a href="#" class="f-social">in</a>
+            <a href="#" class="f-social">▶</a>
+          </div>
+          <div class="footer-locations" style="margin-top:22px;">
+            <strong>Headquarters</strong>
+            Plot No. 5B, Veerasandra Industrial Area, 19 th K.M. Stone, Hosur Road, Electronic City, Bangalore,
+            Karnataka, India – 560 100
+            <strong style="margin-top:12px;">Contact Us</strong>
+            18001218720 | +91 7022669111
+          </div>
+        </div>
+        <div class="footer-col">
+          <h5>Products</h5>
+          <ul>
+            <li><a href="#">Ruminant Solutions</a></li>
+            <li><a href="#">Monogastric Solutions</a></li>
+            <li><a href="#">Phytocee</a></li>
+            <li><a href="#">Kolin Plus</a></li>
+            <li><a href="#">Gut Health Range</a></li>
+            <li><a href="#">Immunity Support</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Company</h5>
+          <ul>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Innovation Centre</a></li>
+            <li><a href="#">Sustainability</a></li>
+            <li><a href="#">Our Expertise</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Press &amp; Media</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Resources</h5>
+          <ul>
+            <li><a href="#">Research Bulletins</a></li>
+            <li><a href="#">Technical Case Studies</a></li>
+            <li><a href="#">Research Articles</a></li>
+            <li><a href="#">Blogs &amp; Insights</a></li>
+            <li><a href="#">Events</a></li>
+            <li><a href="#">FAQ</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h5>Support</h5>
+          <ul>
+            <li><a href="#">Contact Us</a></li>
+            <li><a href="#">Customer Support</a></li>
+            <li><a href="#">Find a Distributor</a></li>
+            <li><a href="#">Wholesale / B2B</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Disclaimer</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 Natural Remedies Pvt. Ltd. All rights reserved. · Electronic City, Bangalore, India</span>
+        <span>
+          <a href="#">Customer Support</a> &nbsp;·&nbsp;
+          <a href="#">Privacy Policy</a> &nbsp;·&nbsp;
+          <a href="#">Disclaimer</a>
+        </span>
+      </div>
+    </footer>
+
+    <!-- ══════════════ SCRIPTS ══════════════ -->
+    <script>
+      gsap.registerPlugin(ScrollTrigger);
+
+      /* ─── LOADER ─── */
+      window.addEventListener('load', () => {
+        setTimeout(() => {
+          gsap.to('#loader', {
+            opacity: 0, duration: .7, ease: 'power2.inOut',
+            onComplete: () => { document.getElementById('loader').style.display = 'none'; }
+          });
+          heroEntrance();
+        }, 2800);
+      });
+
+      /* ─── HERO ENTRANCE ─── */
+      function heroEntrance() {
+        gsap.set(['#hbadge', '#hh1', '#htagline', '#hsub', '#hactions', '#hstats'], { y: 44 });
+        gsap.timeline({ defaults: { ease: 'power4.out' } })
+          .to('#hbadge', { opacity: 1, y: 0, duration: .8, delay: .1 })
+          .to('#hh1', { opacity: 1, y: 0, duration: 1 }, '-=.5')
+          .to('#htagline', { opacity: 1, y: 0, duration: .7 }, '-=.5')
+          .to('#hsub', { opacity: 1, y: 0, duration: .8 }, '-=.55')
+          .to('#hactions', { opacity: 1, y: 0, duration: .7 }, '-=.5')
+          .to('#hstats', { opacity: 1, y: 0, duration: .7 }, '-=.4');
+        animateCounters();
+      }
+
+      /* ─── COUNTERS ─── */
+      function runCounter(c) {
+        const el = document.getElementById(c.id);
+        if (!el) return;
+        let cur = 0, step = c.to / 55;
+        const iv = setInterval(() => {
+          cur = Math.min(cur + step, c.to);
+          el.textContent = Math.round(cur) + c.suffix;
+          if (cur >= c.to) clearInterval(iv);
+        }, 28);
+      }
+
+      function animateCounters() {
+        const heroCs = [
+          { id: 'sc1', to: 30, suffix: '+' },
+          { id: 'sc2', to: 45, suffix: '+' },
+          { id: 'sc3', to: 100, suffix: '+' },
+          { id: 'sc4', to: 20, suffix: '' },
+        ];
+        setTimeout(() => heroCs.forEach(runCounter), 900);
+
+        // Global section counters fire on scroll into view
+        const globalCs = [
+          { id: 'gc1', to: 45, suffix: '+' },
+          { id: 'gc2', to: 30, suffix: '+' },
+          { id: 'gc3', to: 20, suffix: '' },
+        ];
+        let gcDone = false;
+        const gcObs = new IntersectionObserver(entries => {
+          if (entries[0].isIntersecting && !gcDone) {
+            gcDone = true;
+            globalCs.forEach(runCounter);
+            gcObs.disconnect();
+          }
+        }, { threshold: 0.3 });
+        const globalSection = document.getElementById('global');
+        if (globalSection) gcObs.observe(globalSection);
+      }
+
+      /* ─── CURSOR ─── */
+      const cur = document.getElementById('cursor');
+      const ring = document.getElementById('cursor-ring');
+      document.addEventListener('mousemove', e => {
+        cur.style.transform = `translate(${e.clientX - 5}px, ${e.clientY - 5}px)`;
+        ring.style.transform = `translate(${e.clientX - 17}px, ${e.clientY - 17}px)`;
+      });
+      document.querySelectorAll('a, button, .focus-card, .prod-card, .pillar, .t-card, .event-card, .insight-card, .cert-card').forEach(el => {
+        el.addEventListener('mouseenter', () => { ring.style.width = '50px'; ring.style.height = '50px'; ring.style.borderColor = 'rgba(201,144,42,.8)'; });
+        el.addEventListener('mouseleave', () => { ring.style.width = '34px'; ring.style.height = '34px'; ring.style.borderColor = 'rgba(201,144,42,.55)'; });
+      });
+
+      /* ─── NAV SCROLL ─── */
+      const nb = document.getElementById('navbar');
+      window.addEventListener('scroll', () => {
+        nb.classList.toggle('scrolled', window.scrollY > 80);
+        nb.style.top = window.scrollY > 80 ? '0' : '36px';
+      });
+
+      /* ─── SCROLL REVEAL ─── */
+      const ro = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+      }, { threshold: 0.1 });
+      document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+      /* ─── GSAP SCROLL ─── */
+      gsap.utils.toArray('.focus-card').forEach((c, i) => {
+        gsap.fromTo(c,
+          { opacity: 0, y: 60, rotateX: 8 },
+          {
+            opacity: 1, y: 0, rotateX: 0, duration: .9, ease: 'power3.out', delay: i * .1,
+            scrollTrigger: { trigger: c, start: 'top 86%' }
+          });
+      });
+
+      gsap.to('.hero-spline', {
+        y: 70, ease: 'none',
+        scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 1.2 }
+      });
+
+      gsap.to('.av-main', {
+        y: -36, ease: 'none',
+        scrollTrigger: { trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
+      });
+
+      /* ─── 3D TILT ─── */
+      function addTilt(selector, strength) {
+        document.querySelectorAll(selector).forEach(el => {
+          el.addEventListener('mousemove', e => {
+            const r = el.getBoundingClientRect();
+            const x = (e.clientX - r.left) / r.width - 0.5;
+            const y = (e.clientY - r.top) / r.height - 0.5;
+            el.style.transform = `perspective(900px) rotateY(${x * strength}deg) rotateX(${-y * strength * .8}deg) translateY(-8px)`;
+          });
+          el.addEventListener('mouseleave', () => { el.style.transform = ''; });
         });
-        heroEntrance();
-      }, 2800);
-    });
+      }
+      addTilt('.focus-card', 12);
+      addTilt('.prod-card', 10);
+      addTilt('.vert-card', 10);
+      addTilt('.t-card', 7);
+      addTilt('.cert-card', 10); // Added for certifications
 
-    /* ─── HERO ENTRANCE ─── */
-    function heroEntrance() {
-      gsap.set(['#hbadge', '#hh1', '#htagline', '#hsub', '#hactions', '#hstats'], { y: 44 });
-      gsap.timeline({ defaults: { ease: 'power4.out' } })
-        .to('#hbadge', { opacity: 1, y: 0, duration: .8, delay: .1 })
-        .to('#hh1', { opacity: 1, y: 0, duration: 1 }, '-=.5')
-        .to('#htagline', { opacity: 1, y: 0, duration: .7 }, '-=.5')
-        .to('#hsub', { opacity: 1, y: 0, duration: .8 }, '-=.55')
-        .to('#hactions', { opacity: 1, y: 0, duration: .7 }, '-=.5')
-        .to('#hstats', { opacity: 1, y: 0, duration: .7 }, '-=.4');
-      animateCounters();
-    }
-
-    /* ─── COUNTERS ─── */
-    function runCounter(c) {
-      const el = document.getElementById(c.id);
-      if (!el) return;
-      let cur = 0, step = c.to / 55;
-      const iv = setInterval(() => {
-        cur = Math.min(cur + step, c.to);
-        el.textContent = Math.round(cur) + c.suffix;
-        if (cur >= c.to) clearInterval(iv);
-      }, 28);
-    }
-
-    function animateCounters() {
-      const heroCs = [
-        { id: 'sc1', to: 30, suffix: '+' },
-        { id: 'sc2', to: 45, suffix: '+' },
-        { id: 'sc3', to: 100, suffix: '+' },
-        { id: 'sc4', to: 20, suffix: '' },
-      ];
-      setTimeout(() => heroCs.forEach(runCounter), 900);
-
-      // Global section counters fire on scroll into view
-      const globalCs = [
-        { id: 'gc1', to: 45, suffix: '+' },
-        { id: 'gc2', to: 30, suffix: '+' },
-        { id: 'gc3', to: 20, suffix: '' },
-      ];
-      let gcDone = false;
-      const gcObs = new IntersectionObserver(entries => {
-        if (entries[0].isIntersecting && !gcDone) {
-          gcDone = true;
-          globalCs.forEach(runCounter);
-          gcObs.disconnect();
-        }
-      }, { threshold: 0.3 });
-      const globalSection = document.getElementById('global');
-      if (globalSection) gcObs.observe(globalSection);
-    }
-
-    /* ─── CURSOR ─── */
-    const cur = document.getElementById('cursor');
-    const ring = document.getElementById('cursor-ring');
-    document.addEventListener('mousemove', e => {
-      cur.style.transform = `translate(${e.clientX - 5}px, ${e.clientY - 5}px)`;
-      ring.style.transform = `translate(${e.clientX - 17}px, ${e.clientY - 17}px)`;
-    });
-    document.querySelectorAll('a, button, .focus-card, .prod-card, .pillar, .t-card, .event-card, .insight-card').forEach(el => {
-      el.addEventListener('mouseenter', () => { ring.style.width = '50px'; ring.style.height = '50px'; ring.style.borderColor = 'rgba(201,144,42,.8)'; });
-      el.addEventListener('mouseleave', () => { ring.style.width = '34px'; ring.style.height = '34px'; ring.style.borderColor = 'rgba(201,144,42,.55)'; });
-    });
-
-    /* ─── NAV SCROLL ─── */
-    const nb = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      nb.classList.toggle('scrolled', window.scrollY > 80);
-      nb.style.top = window.scrollY > 80 ? '0' : '36px';
-    });
-
-    /* ─── SCROLL REVEAL ─── */
-    const ro = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1 });
-    document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
-
-    /* ─── GSAP SCROLL ─── */
-    gsap.utils.toArray('.focus-card').forEach((c, i) => {
-      gsap.fromTo(c,
-        { opacity: 0, y: 60, rotateX: 8 },
-        {
-          opacity: 1, y: 0, rotateX: 0, duration: .9, ease: 'power3.out', delay: i * .1,
-          scrollTrigger: { trigger: c, start: 'top 86%' }
-        });
-    });
-
-    gsap.to('.hero-spline', {
-      y: 70, ease: 'none',
-      scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: 1.2 }
-    });
-
-    gsap.to('.av-main', {
-      y: -36, ease: 'none',
-      scrollTrigger: { trigger: '#about', start: 'top bottom', end: 'bottom top', scrub: 1.5 }
-    });
-
-    /* ─── 3D TILT ─── */
-    function addTilt(selector, strength) {
-      document.querySelectorAll(selector).forEach(el => {
-        el.addEventListener('mousemove', e => {
-          const r = el.getBoundingClientRect();
+      /* 3D about card */
+      const av3d = document.getElementById('av3d');
+      if (av3d) {
+        av3d.addEventListener('mousemove', e => {
+          const r = av3d.getBoundingClientRect();
           const x = (e.clientX - r.left) / r.width - 0.5;
           const y = (e.clientY - r.top) / r.height - 0.5;
-          el.style.transform = `perspective(900px) rotateY(${x * strength}deg) rotateX(${-y * strength * .8}deg) translateY(-8px)`;
+          av3d.style.transform = `perspective(1200px) rotateY(${x * 22}deg) rotateX(${-y * 16}deg)`;
         });
-        el.addEventListener('mouseleave', () => { el.style.transform = ''; });
-      });
-    }
-    addTilt('.focus-card', 12);
-    addTilt('.prod-card', 10);
-    addTilt('.vert-card', 10);
-    addTilt('.t-card', 7);
-
-    /* 3D about card */
-    const av3d = document.getElementById('av3d');
-    if (av3d) {
-      av3d.addEventListener('mousemove', e => {
-        const r = av3d.getBoundingClientRect();
-        const x = (e.clientX - r.left) / r.width - 0.5;
-        const y = (e.clientY - r.top) / r.height - 0.5;
-        av3d.style.transform = `perspective(1200px) rotateY(${x * 22}deg) rotateX(${-y * 16}deg)`;
-      });
-      av3d.addEventListener('mouseleave', () => {
-        av3d.style.transform = 'perspective(1200px) rotateY(8deg) rotateX(-3deg)';
-      });
-    }
-
-    /* ─── THREE.JS PARTICLES ─── */
-    (function () {
-      const canvas = document.getElementById('three-canvas');
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
-      camera.position.z = 5;
-      function resize() {
-        renderer.setSize(innerWidth, innerHeight);
-        camera.aspect = innerWidth / innerHeight;
-        camera.updateProjectionMatrix();
+        av3d.addEventListener('mouseleave', () => {
+          av3d.style.transform = 'perspective(1200px) rotateY(8deg) rotateX(-3deg)';
+        });
       }
-      resize();
-      window.addEventListener('resize', resize);
 
-      function makeParticles(count, color, spread) {
-        const geo = new THREE.BufferGeometry();
-        const pos = new Float32Array(count * 3);
-        for (let i = 0; i < count; i++) {
-          pos[i * 3] = (Math.random() - .5) * spread;
-          pos[i * 3 + 1] = (Math.random() - .5) * spread;
-          pos[i * 3 + 2] = (Math.random() - .5) * spread * .5;
+      /* ─── THREE.JS PARTICLES ─── */
+      (function () {
+        const canvas = document.getElementById('three-canvas');
+        const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, innerWidth / innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+        function resize() {
+          renderer.setSize(innerWidth, innerHeight);
+          camera.aspect = innerWidth / innerHeight;
+          camera.updateProjectionMatrix();
         }
-        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
-        const mat = new THREE.PointsMaterial({ color, size: .04, transparent: true, opacity: .5, sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false });
-        const pts = new THREE.Points(geo, mat);
-        scene.add(pts);
-        return pts;
-      }
+        resize();
+        window.addEventListener('resize', resize);
 
-      const p1 = makeParticles(1600, 0x2fb05a, 20);
-      const p2 = makeParticles(350, 0xc9902a, 18);
-      let mx = 0, my = 0;
-      document.addEventListener('mousemove', e => {
-        mx = (e.clientX / innerWidth - .5) * .28;
-        my = (e.clientY / innerHeight - .5) * .28;
-      });
+        function makeParticles(count, color, spread) {
+          const geo = new THREE.BufferGeometry();
+          const pos = new Float32Array(count * 3);
+          for (let i = 0; i < count; i++) {
+            pos[i * 3] = (Math.random() - .5) * spread;
+            pos[i * 3 + 1] = (Math.random() - .5) * spread;
+            pos[i * 3 + 2] = (Math.random() - .5) * spread * .5;
+          }
+          geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+          const mat = new THREE.PointsMaterial({ color, size: .04, transparent: true, opacity: .5, sizeAttenuation: true, blending: THREE.AdditiveBlending, depthWrite: false });
+          const pts = new THREE.Points(geo, mat);
+          scene.add(pts);
+          return pts;
+        }
 
-      let t = 0;
-      (function animate() {
-        requestAnimationFrame(animate);
-        t += .0025;
-        p1.rotation.y = t * .07 + mx;
-        p1.rotation.x = t * .04 + my;
-        p2.rotation.y = -t * .05 + mx * .6;
-        p2.rotation.x = -t * .03 + my * .6;
-        const a = p1.geometry.attributes.position.array;
-        for (let i = 0; i < 1600; i++) a[i * 3 + 1] += Math.sin(t + i * .12) * .0008;
-        p1.geometry.attributes.position.needsUpdate = true;
-        renderer.render(scene, camera);
-      })();
-    })();
-
-    /* ─── SMOOTH SCROLL ─── */
-    document.querySelectorAll('a[href^="#"]').forEach(a => {
-      a.addEventListener('click', e => {
-        e.preventDefault();
-        const id = a.getAttribute('href');
-        if (id === '#') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
-        const t = document.querySelector(id);
-        if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 88, behavior: 'smooth' });
-      });
-    });
-
-    /* ─── CONTACT FORM → N8N WEBHOOK ─── */
-    const WEBHOOK_URL = 'https://miniature-ugt6x.crab.containers.automata.host/webhook/eb77de00-6a1e-41a3-9492-553629f5d448';
-
-    const form = document.getElementById('contact-form');
-    const btn = document.getElementById('form-btn');
-    const toast = document.getElementById('form-toast');
-
-    form.addEventListener('submit', async function (e) {
-      e.preventDefault();
-
-      // Set timestamp
-      document.getElementById('submittedAt').value = new Date().toISOString();
-
-      // Validate
-      const required = form.querySelectorAll('[required]');
-      let valid = true;
-      required.forEach(f => {
-        if (!f.value.trim()) { f.style.borderColor = 'rgba(212,74,74,.6)'; valid = false; }
-        else { f.style.borderColor = ''; }
-      });
-      if (!valid) {
-        showToast('Please fill in all required fields.', 'error');
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = 'Sending…';
-
-      const data = Object.fromEntries(new FormData(form));
-
-      try {
-        await fetch(WEBHOOK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
+        const p1 = makeParticles(1600, 0x2fb05a, 20);
+        const p2 = makeParticles(350, 0xc9902a, 18);
+        let mx = 0, my = 0;
+        document.addEventListener('mousemove', e => {
+          mx = (e.clientX / innerWidth - .5) * .28;
+          my = (e.clientY / innerHeight - .5) * .28;
         });
-        showToast('✓ Message sent! Our team will be in touch within 24 hours.', 'success');
-        form.reset();
-      } catch (err) {
-        showToast('Something went wrong. Please email us directly.', 'error');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Send Message →';
-      }
-    });
 
-    function showToast(msg, type) {
-      toast.textContent = msg;
-      toast.className = 'form-toast ' + type;
-      setTimeout(() => { toast.className = 'form-toast'; }, 6000);
-    }
+        let t = 0;
+        (function animate() {
+          requestAnimationFrame(animate);
+          t += .0025;
+          p1.rotation.y = t * .07 + mx;
+          p1.rotation.x = t * .04 + my;
+          p2.rotation.y = -t * .05 + mx * .6;
+          p2.rotation.x = -t * .03 + my * .6;
+          const a = p1.geometry.attributes.position.array;
+          for (let i = 0; i < 1600; i++) a[i * 3 + 1] += Math.sin(t + i * .12) * .0008;
+          p1.geometry.attributes.position.needsUpdate = true;
+          renderer.render(scene, camera);
+        })();
+      })();
 
-    /* ─── HAMBURGER MENU ─── */
-    const burger = document.getElementById('nav-burger');
-    const navLinks = document.querySelector('.nav-links');
-    burger.addEventListener('click', () => {
-      burger.classList.toggle('active');
-      navLinks.classList.toggle('mobile-open');
-      document.body.style.overflow = navLinks.classList.contains('mobile-open') ? 'hidden' : '';
-    });
-    // Close menu when any nav link is clicked
-    navLinks.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        burger.classList.remove('active');
-        navLinks.classList.remove('mobile-open');
-        document.body.style.overflow = '';
+      /* ─── SMOOTH SCROLL ─── */
+      document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+          e.preventDefault();
+          const id = a.getAttribute('href');
+          if (id === '#') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+          const t = document.querySelector(id);
+          if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 88, behavior: 'smooth' });
+        });
       });
-    });
 
-    /* Page fade in */
-    document.body.style.opacity = '0';
-    requestAnimationFrame(() => {
-      document.body.style.transition = 'opacity .45s ease';
-      document.body.style.opacity = '1';
-    });
-  </script>
+      /* ─── CONTACT FORM → N8N WEBHOOK ─── */
+      const WEBHOOK_URL = 'https://miniature-ugt6x.crab.containers.automata.host/webhook/eb77de00-6a1e-41a3-9492-553629f5d448';
+
+      const form = document.getElementById('contact-form');
+      const btn = document.getElementById('form-btn');
+      const toast = document.getElementById('form-toast');
+
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        // Set timestamp
+        document.getElementById('submittedAt').value = new Date().toISOString();
+
+        // Validate
+        const required = form.querySelectorAll('[required]');
+        let valid = true;
+        required.forEach(f => {
+          if (!f.value.trim()) { f.style.borderColor = 'rgba(212,74,74,.6)'; valid = false; }
+          else { f.style.borderColor = ''; }
+        });
+        if (!valid) {
+          showToast('Please fill in all required fields.', 'error');
+          return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Sending…';
+
+        const data = Object.fromEntries(new FormData(form));
+
+        try {
+          await fetch(WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+          });
+          showToast('✓ Message sent! Our team will be in touch within 24 hours.', 'success');
+          form.reset();
+        } catch (err) {
+          showToast('Something went wrong. Please email us directly.', 'error');
+        } finally {
+          btn.disabled = false;
+          btn.textContent = 'Send Message →';
+        }
+      });
+
+      function showToast(msg, type) {
+        toast.textContent = msg;
+        toast.className = 'form-toast ' + type;
+        setTimeout(() => { toast.className = 'form-toast'; }, 6000);
+      }
+
+      /* ─── HAMBURGER MENU ─── */
+      const burger = document.getElementById('nav-burger');
+      const navLinks = document.querySelector('.nav-links');
+      burger.addEventListener('click', () => {
+        burger.classList.toggle('active');
+        navLinks.classList.toggle('mobile-open');
+        document.body.style.overflow = navLinks.classList.contains('mobile-open') ? 'hidden' : '';
+      });
+      // Close menu when any nav link is clicked
+      navLinks.querySelectorAll('a').forEach(a => {
+        a.addEventListener('click', () => {
+          burger.classList.remove('active');
+          navLinks.classList.remove('mobile-open');
+          document.body.style.overflow = '';
+        });
+      });
+
+      /* Page fade in */
+      document.body.style.opacity = '0';
+      requestAnimationFrame(() => {
+        document.body.style.transition = 'opacity .45s ease';
+        document.body.style.opacity = '1';
+
+        gsap.from(".hero-content .btn-primary", {
+          opacity: 0,
+          y: 20,
+          duration: 1,
+          delay: 0.9,
+          ease: "power3.out",
+        });
+
+        // Testimonials ScrollTrigger
+        gsap.from(".t-card", { // Changed from .testimonial-card to .t-card
+          scrollTrigger: {
+            trigger: "#testimonials",
+            start: "top 70%"
+          },
+          y: 40,
+          opacity: 0,
+          duration: 1,
+          stagger: 0.15,
+          ease: "power3.out"
+        });
+
+        // 3D Scroll Animations for Cards (21st.dev style)
+        gsap.utils.toArray('.gsap-3d').forEach(card => {
+          gsap.from(card, {
+            scrollTrigger: {
+              trigger: card,
+              start: "top 85%",
+              toggleActions: "play none none reverse"
+            },
+            opacity: 0,
+            y: 60,
+            rotationX: 45,
+            rotationY: -15,
+            transformOrigin: "center center -50px",
+            duration: 1.2,
+            ease: "power3.out"
+          });
+        });
+
+        // Spline Background Fallback Logic
+        const splineBg = document.getElementById('spline-bg');
+        const splineFallback = document.getElementById('spline-fallback');
+        const splineViewer = document.getElementById('spline-viewer');
+
+        function shouldLoadSpline() {
+          const isMobile = window.innerWidth < 768;
+          const isLowEnd = navigator.hardwareConcurrency <= 2;
+          return !isMobile && !isLowEnd;
+        }
+
+        if (!shouldLoadSpline()) {
+          // low-end or mobile fallback
+          if (splineBg) splineBg.remove();
+        } else {
+          const timeout = setTimeout(() => {
+            if (splineBg) splineBg.remove();
+            if (splineFallback) splineFallback.style.opacity = '1';
+          }, 10000);
+
+          if (splineViewer) {
+            splineViewer.addEventListener('load', () => {
+              clearTimeout(timeout);
+              splineBg.classList.add('loaded');
+              splineFallback.style.transition = 'opacity 1s ease';
+              splineFallback.style.opacity = '0';
+              setTimeout(() => splineFallback.remove(), 1000);
+            });
+          }
+        }
+      });
+    </script>
+  </div>
 </body>
 
 </html>
