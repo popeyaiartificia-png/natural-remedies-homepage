@@ -23,20 +23,26 @@
   <style>
     /* ─── TOKENS ──────────────────────────────────────────────────────── */
     :root {
-      --green-deep: #062514;
-      --green-mid: #0e4a28;
-      --green-bright: #1a7a40;
-      --green-light: #2fb05a;
-      --gold: #c9902a;
-      --gold-light: #e8b96a;
-      --amber: #d4743a;
-      --blue-accent: #1a6080;
-      --cream: #f5f0e8;
+      --green-deep: #0a351e;
+      /* Lighter than #062514 */
+      --green-mid: #156236;
+      /* Lighter than #0e4a28 */
+      --green-bright: #229952;
+      /* Lighter than #1a7a40 */
+      --green-light: #3dd670;
+      /* Lighter than #2fb05a */
+      --gold: #d49c36;
+      /* Slightly brighter gold */
+      --gold-light: #f2c77d;
+      --amber: #eb8444;
+      --blue-accent: #217ba3;
+      --cream: #f9f5f0;
       --white: #ffffff;
-      --glass-bg: rgba(255, 255, 255, 0.06);
-      --glass-border: rgba(255, 255, 255, 0.12);
-      --text-faint: rgba(255, 255, 255, 0.45);
-      --text-mid: rgba(255, 255, 255, 0.65);
+      --glass-bg: rgba(255, 255, 255, 0.08);
+      /* Slightly more opaque glass */
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --text-faint: rgba(255, 255, 255, 0.55);
+      --text-mid: rgba(255, 255, 255, 0.75);
     }
 
     *,
@@ -1722,6 +1728,16 @@
       margin-top: 5px;
     }
 
+    #hero {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      padding: 120px 5% 60px;
+      overflow: hidden;
+      background: linear-gradient(to right, rgba(10, 53, 30, 0.92) 0%, rgba(10, 53, 30, 0.7) 100%), url('assets/img/hero-bg.png') center/cover no-repeat;
+    }
+
     .globe-visual {
       position: relative;
       height: 420px;
@@ -1925,8 +1941,9 @@
 
     /* ─── CONTACT FORM ────────────────────────────────────────────────── */
     #contact {
-      padding: 130px 0;
-      background: #041b0e;
+      position: relative;
+      padding: 120px 5%;
+      background: linear-gradient(to bottom, var(--green-deep) 0%, rgba(10, 53, 30, 0.8) 100%), url('assets/img/contact-bg.png') center/cover no-repeat fixed;
     }
 
     .contact-inner {
