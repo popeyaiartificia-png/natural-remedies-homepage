@@ -364,13 +364,16 @@
 
     .hero-spline {
       position: absolute;
-      right: -8vw;
+      right: 0;
       top: 50%;
       transform: translateY(-50%);
-      width: 62vw;
-      height: 100vh;
-      z-index: 3;
-      opacity: .85;
+      width: 45vw;
+      max-width: 600px;
+      height: 85vh;
+      max-height: 800px;
+      z-index: 1;
+      /* Move behind hero-content */
+      opacity: .9;
     }
 
     .hero-content {
@@ -378,6 +381,10 @@
       z-index: 4;
       padding: 0 6vw;
       max-width: 680px;
+      background: rgba(10, 53, 30, 0.4);
+      border-radius: 20px;
+      padding: 40px;
+      backdrop-filter: blur(8px);
     }
 
     .hero-badge {
@@ -2419,6 +2426,13 @@
       .vert-grid {
         grid-template-columns: 1fr 1fr;
       }
+
+      .hero-spline {
+        opacity: .2;
+        width: 100vw;
+        right: 0;
+        z-index: 0;
+      }
     }
 
     /* ─── HAMBURGER ─────────────────────────────────────────────────── */
@@ -2692,6 +2706,71 @@
     .ec-upcoming .ec-photo {
       filter: saturate(1.1) brightness(.9);
     }
+
+    /* ─── BRAND LOGO SVG ─── */
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .brand-logo svg {
+      width: 42px;
+      height: 42px;
+      flex-shrink: 0;
+    }
+
+    .brand-logo .logo-text {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--white);
+      line-height: 1.1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-logo .logo-text span {
+      font-family: 'Cormorant Garamond', serif;
+      color: var(--gold-light);
+      font-style: italic;
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-top: -6px;
+    }
+
+    .loader-logo {
+      opacity: 0;
+      animation: fadeUp .8s ease .3s forwards;
+      margin-bottom: 24px;
+    }
+
+    .loader-logo svg {
+      width: 56px;
+      height: 56px;
+    }
+
+    .loader-logo .logo-text {
+      font-size: 28px;
+    }
+
+    .loader-logo .logo-text span {
+      font-size: 30px;
+    }
+
+    .nav-brand-wrap {
+      transition: transform 0.3s;
+    }
+
+    nav.scrolled .nav-brand-wrap {
+      transform: scale(0.95);
+    }
+
+    .footer-logo-wrap {
+      margin-bottom: 20px;
+    }
   </style>
 </head>
 
@@ -2703,8 +2782,21 @@
 
   <!-- LOADER -->
   <div id="loader">
-    <img src="https://www.naturalremedy.com/wp-content/uploads/2025/08/NR-New-logo-r.webp" alt="Natural Remedies"
-      class="loader-logo-img" />
+    <div class="brand-logo loader-logo">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12 22C12 22 20 16 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 16 12 22 12 22Z"
+          fill="url(#logo-grad1)" />
+        <path d="M12 22C12 22 4 16 4 10C4 5.58172 7.58172 2 12 2V22Z" fill="#2FB05A" />
+        <path d="M12 15C12 15 15.5 11.5 15.5 8C15.5 5.5 14 4 12 4V15Z" fill="#C9902A" />
+        <defs>
+          <linearGradient id="logo-grad1" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+            <stop stop-color="#0E4A28" />
+            <stop offset="1" stop-color="#2FB05A" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="logo-text">Natural<span>Remedies</span></div>
+    </div>
     <div class="l-bar">
       <div class="l-fill"></div>
     </div>
@@ -2713,22 +2805,27 @@
 
   <!-- LANG BAR -->
   <div class="lang-bar" style="padding-top:6px;padding-bottom:6px;">
-    <a href="#">Home</a>
-    <a href="#about">About Us</a>
-    <a href="#focus">Products</a>
-    <a href="#rnd">Our Expertise</a>
-    <a href="#insights">Blogs &amp; Insights</a>
-    <a href="#events">Events</a>
-    <a href="#contact">Careers</a>
-    <a href="#verticals">Sustainability</a>
     <div class="lang-selector">🌐 Language (20+ Countries) ▾</div>
   </div>
 
   <!-- NAV -->
   <nav id="navbar" style="top:36px;">
-    <a href="#" class="nav-logo">
-      <img src="https://www.naturalremedy.com/wp-content/uploads/2025/08/NR-New-logo-r.webp" alt="Natural Remedies"
-        class="nav-logo-img" />
+    <a href="#" class="nav-logo nav-brand-wrap">
+      <div class="brand-logo">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 22C12 22 20 16 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 16 12 22 12 22Z"
+            fill="url(#logo-grad2)" />
+          <path d="M12 22C12 22 4 16 4 10C4 5.58172 7.58172 2 12 2V22Z" fill="#2FB05A" />
+          <path d="M12 15C12 15 15.5 11.5 15.5 8C15.5 5.5 14 4 12 4V15Z" fill="#C9902A" />
+          <defs>
+            <linearGradient id="logo-grad2" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#0E4A28" />
+              <stop offset="1" stop-color="#2FB05A" />
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="logo-text">Natural<span>Remedies</span></div>
+      </div>
     </a>
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
@@ -3709,9 +3806,22 @@
   <footer>
     <div class="footer-grid">
       <div class="footer-brand">
-        <a href="#">
-          <img src="https://www.naturalremedy.com/wp-content/uploads/2025/08/NR-New-logo-r.webp" alt="Natural Remedies"
-            class="footer-logo-img" />
+        <a href="#" class="footer-logo-wrap" style="display:inline-block;">
+          <div class="brand-logo">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 22C12 22 20 16 20 10C20 5.58172 16.4183 2 12 2C7.58172 2 4 5.58172 4 10C4 16 12 22 12 22Z"
+                fill="url(#logo-grad3)" />
+              <path d="M12 22C12 22 4 16 4 10C4 5.58172 7.58172 2 12 2V22Z" fill="#2FB05A" />
+              <path d="M12 15C12 15 15.5 11.5 15.5 8C15.5 5.5 14 4 12 4V15Z" fill="#C9902A" />
+              <defs>
+                <linearGradient id="logo-grad3" x1="4" y1="2" x2="20" y2="22" gradientUnits="userSpaceOnUse">
+                  <stop stop-color="#0E4A28" />
+                  <stop offset="1" stop-color="#2FB05A" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="logo-text">Natural<span>Remedies</span></div>
+          </div>
         </a>
         <p>Pioneering natural, science-backed animal health solutions for veterinarians and livestock producers across
           45+ countries for over three decades.</p>
