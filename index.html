@@ -1,0 +1,1595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Natural Remedies — Leading Innovations In Animal Nutrition And Healthcare</title>
+  <meta name="description" content="Pioneers in phytogenics for animal health. Natural, science-backed solutions for ruminants and monogastrics across 45+ countries." />
+
+  <!-- GSAP + ScrollTrigger -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <!-- Three.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=Inter:wght@300;400;500;600;700&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── TOKENS ──────────────────────────────────────────────────────── */
+    :root {
+      --green-deep:   #062514;
+      --green-mid:    #0e4a28;
+      --green-bright: #1a7a40;
+      --green-light:  #2fb05a;
+      --gold:         #c9902a;
+      --gold-light:   #e8b96a;
+      --amber:        #d4743a;
+      --blue-accent:  #1a6080;
+      --cream:        #f5f0e8;
+      --white:        #ffffff;
+      --glass-bg:     rgba(255,255,255,0.06);
+      --glass-border: rgba(255,255,255,0.12);
+      --text-faint:   rgba(255,255,255,0.45);
+      --text-mid:     rgba(255,255,255,0.65);
+    }
+
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+    html { scroll-behavior:smooth; overflow-x:hidden; }
+    body { background:var(--green-deep); color:var(--white); font-family:'Inter',sans-serif; overflow-x:hidden; cursor:none; }
+
+    /* ─── CURSOR ──────────────────────────────────────────────────────── */
+    #cursor      { width:10px;height:10px;background:var(--gold-light);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9999;mix-blend-mode:difference;transition:transform .12s ease; }
+    #cursor-ring { width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;position:fixed;top:0;left:0;pointer-events:none;z-index:9998;transition:all .3s cubic-bezier(.23,1,.32,1);opacity:.55; }
+
+    /* ─── LOADER ──────────────────────────────────────────────────────── */
+    #loader { position:fixed;inset:0;background:var(--green-deep);z-index:9000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px; }
+    .l-logo  { font-family:'Playfair Display',serif;font-size:clamp(24px,4vw,46px);font-weight:900;background:linear-gradient(135deg,var(--green-light),var(--gold-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;opacity:0;animation:fadeUp .8s ease .3s forwards; }
+    .l-sub   { font-size:11px;letter-spacing:3.5px;text-transform:uppercase;color:var(--text-faint);opacity:0;animation:fadeUp .6s ease .7s forwards; }
+    .l-bar   { width:200px;height:2px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden; }
+    .l-fill  { height:100%;background:linear-gradient(90deg,var(--green-bright),var(--gold));width:0;animation:fillBar 2.2s cubic-bezier(.4,0,.2,1) .5s forwards; }
+    @keyframes fillBar { to { width:100%; } }
+    @keyframes fadeUp  { from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)} }
+
+    /* ─── LANGUAGE BAR ────────────────────────────────────────────────── */
+    .lang-bar { background:rgba(0,0,0,.25);border-bottom:1px solid rgba(255,255,255,.06);padding:7px 6vw;display:flex;justify-content:flex-end;align-items:center;gap:20px;font-size:11px;letter-spacing:.5px;color:var(--text-faint);position:relative;z-index:998; }
+    .lang-bar a { color:var(--text-faint);text-decoration:none;transition:color .25s; }
+    .lang-bar a:hover { color:var(--white); }
+    .lang-selector { display:flex;align-items:center;gap:6px;cursor:pointer;color:var(--gold-light);font-weight:500; }
+
+    /* ─── NAV ─────────────────────────────────────────────────────────── */
+    nav { position:fixed;top:0;left:0;right:0;z-index:1000;padding:18px 6vw;display:flex;align-items:center;justify-content:space-between;transition:all .4s ease; }
+    nav.scrolled { background:rgba(6,37,20,.9);backdrop-filter:blur(24px);padding:12px 6vw;border-bottom:1px solid var(--glass-border); }
+    .nav-logo { font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--white);text-decoration:none;display:flex;align-items:center;gap:10px; }
+    .nav-logo-icon { width:38px;height:38px;background:linear-gradient(135deg,var(--green-bright),var(--gold));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
+    .nav-links { display:flex;gap:30px;list-style:none;align-items:center; }
+    .nav-links a { color:var(--text-mid);text-decoration:none;font-size:13px;font-weight:500;letter-spacing:.3px;position:relative;transition:color .3s; }
+    .nav-links a::after { content:'';position:absolute;bottom:-3px;left:0;width:0;height:1.5px;background:var(--gold-light);transition:width .3s; }
+    .nav-links a:hover { color:var(--white); }
+    .nav-links a:hover::after { width:100%; }
+    .nav-dropdown { position:relative; }
+    .nav-dropdown-menu { display:none;position:absolute;top:calc(100% + 12px);left:-16px;background:rgba(6,37,20,.97);border:1px solid var(--glass-border);border-radius:14px;padding:10px;min-width:200px;backdrop-filter:blur(20px); }
+    .nav-dropdown:hover .nav-dropdown-menu { display:block; }
+    .nav-dropdown-menu a { display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;font-size:13px;color:var(--text-mid);transition:all .25s;white-space:nowrap; }
+    .nav-dropdown-menu a:hover { background:rgba(255,255,255,.07);color:var(--white); }
+    .nav-dropdown-menu a::after { display:none; }
+    .nav-cta { background:linear-gradient(135deg,var(--green-bright),var(--green-mid));color:var(--white)!important;padding:9px 22px;border-radius:99px;border:1px solid rgba(255,255,255,.15);box-shadow:0 0 20px rgba(26,122,64,.4);transition:all .3s!important; }
+    .nav-cta:hover { box-shadow:0 0 36px rgba(26,122,64,.65)!important;transform:translateY(-1px); }
+    .nav-cta::after { display:none!important; }
+
+    /* ─── HERO ────────────────────────────────────────────────────────── */
+    #hero { min-height:100vh;position:relative;display:flex;align-items:center;overflow:hidden;padding-top:80px; }
+    #three-canvas { position:absolute;inset:0;z-index:1; }
+    .hero-mesh { position:absolute;inset:0;background:radial-gradient(ellipse 55% 60% at 15% 50%,rgba(26,122,64,.18) 0%,transparent 65%),radial-gradient(ellipse 40% 50% at 85% 40%,rgba(201,144,42,.08) 0%,transparent 65%);pointer-events:none;z-index:2; }
+    .hero-spline { position:absolute;right:-8vw;top:50%;transform:translateY(-50%);width:62vw;height:100vh;z-index:3;opacity:.85; }
+    .hero-content { position:relative;z-index:4;padding:0 6vw;max-width:680px; }
+    .hero-badge { display:inline-flex;align-items:center;gap:8px;background:var(--glass-bg);border:1px solid var(--glass-border);backdrop-filter:blur(10px);padding:7px 16px;border-radius:99px;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold-light);margin-bottom:26px;opacity:0; }
+    .badge-dot { width:6px;height:6px;background:var(--gold-light);border-radius:50%;animation:pulseDot 2s ease infinite; }
+    @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(1.6)} }
+    .hero-h1 { font-family:'Playfair Display',serif;font-size:clamp(38px,6.5vw,86px);font-weight:900;line-height:1.06;margin-bottom:22px;opacity:0; }
+    .hero-h1 em { font-style:italic;background:linear-gradient(130deg,var(--green-light),var(--gold-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent; }
+    .hero-tagline { font-family:'Cormorant Garamond',serif;font-style:italic;font-size:clamp(16px,2vw,22px);color:var(--gold-light);margin-bottom:18px;opacity:0;letter-spacing:.5px; }
+    .hero-sub { font-size:clamp(14px,1.6vw,17px);line-height:1.8;color:var(--text-mid);max-width:500px;margin-bottom:40px;opacity:0;font-weight:300; }
+    .hero-actions { display:flex;align-items:center;gap:16px;flex-wrap:wrap;opacity:0; }
+    .btn-primary { display:inline-flex;align-items:center;gap:9px;background:linear-gradient(135deg,var(--green-bright),var(--green-mid));color:var(--white);text-decoration:none;padding:15px 32px;border-radius:99px;font-size:13.5px;font-weight:600;border:1px solid rgba(255,255,255,.12);box-shadow:0 8px 28px rgba(26,122,64,.42),inset 0 1px 0 rgba(255,255,255,.1);transition:all .35s cubic-bezier(.23,1,.32,1);position:relative;overflow:hidden;cursor:pointer;font-family:'Inter',sans-serif; }
+    .btn-primary::before { content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.14),transparent);opacity:0;transition:opacity .3s; }
+    .btn-primary:hover::before { opacity:1; }
+    .btn-primary:hover { transform:translateY(-3px);box-shadow:0 16px 44px rgba(26,122,64,.55); }
+    .btn-outline { display:inline-flex;align-items:center;gap:9px;color:rgba(255,255,255,.75);text-decoration:none;padding:14px 28px;border-radius:99px;font-size:13.5px;font-weight:500;border:1.5px solid rgba(255,255,255,.2);transition:all .3s;cursor:pointer;font-family:'Inter',sans-serif;background:transparent; }
+    .btn-outline:hover { color:var(--white);border-color:var(--gold-light);background:rgba(201,144,42,.08); }
+    .hero-stats { position:absolute;bottom:52px;left:6vw;display:flex;gap:44px;z-index:4;opacity:0; }
+    .h-stat h3 { font-family:'Playfair Display',serif;font-size:34px;font-weight:700;background:linear-gradient(135deg,var(--white),var(--gold-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent; }
+    .h-stat p { font-size:11px;color:var(--text-faint);letter-spacing:1.5px;text-transform:uppercase;margin-top:3px; }
+    .stat-div { width:1px;background:rgba(255,255,255,.1);height:44px;align-self:center; }
+    .scroll-cue { position:absolute;bottom:28px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(255,255,255,.28);z-index:3; }
+    .scroll-line { width:1px;height:44px;background:linear-gradient(to bottom,rgba(255,255,255,.28),transparent);animation:scrollAnim 2s ease infinite; }
+    @keyframes scrollAnim { 0%{transform:scaleY(0);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom} }
+
+    /* ─── MARQUEE ─────────────────────────────────────────────────────── */
+    .marquee-wrap { background:linear-gradient(90deg,rgba(14,74,40,.8),rgba(6,37,20,.9) 30%,rgba(6,37,20,.9) 70%,rgba(14,74,40,.8));border-top:1px solid rgba(255,255,255,.05);border-bottom:1px solid rgba(255,255,255,.05);padding:15px 0;overflow:hidden;position:relative;z-index:2; }
+    .marquee-inner { display:flex;animation:mRun 35s linear infinite;white-space:nowrap; }
+    .m-item { display:flex;align-items:center;gap:10px;padding:0 38px;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:rgba(255,255,255,.38);font-weight:500; }
+    .m-item span { color:var(--gold);font-size:16px; }
+    @keyframes mRun { from{transform:translateX(0)}to{transform:translateX(-50%)} }
+
+    /* ─── SECTION HELPERS ─────────────────────────────────────────────── */
+    section { position:relative; }
+    .s-inner { max-width:1280px;margin:0 auto;padding:0 6vw; }
+    .s-label { display:inline-flex;align-items:center;gap:9px;font-size:10.5px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:16px; }
+    .s-label::before { content:'';display:block;width:24px;height:1.5px;background:var(--gold); }
+    .reveal { opacity:0;transform:translateY(38px);transition:opacity .8s cubic-bezier(.23,1,.32,1),transform .8s cubic-bezier(.23,1,.32,1); }
+    .reveal.visible { opacity:1;transform:translateY(0); }
+    .rd1{transition-delay:.1s}.rd2{transition-delay:.2s}.rd3{transition-delay:.3s}.rd4{transition-delay:.4s}
+
+    /* ─── ABOUT / STORY ───────────────────────────────────────────────── */
+    #about { padding:130px 0;background:linear-gradient(180deg,var(--green-deep) 0%,#041b0e 100%); }
+    .about-grid { display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center; }
+    .about-visual { position:relative;height:540px; }
+    .av-card { position:absolute;border-radius:22px;overflow:hidden;box-shadow:0 36px 72px rgba(0,0,0,.55); }
+    .av-main { width:70%;height:400px;top:0;left:0;background:linear-gradient(145deg,#1a5c35,#062514);transform:perspective(1200px) rotateY(8deg) rotateX(-3deg);display:flex;align-items:center;justify-content:center;font-size:110px;transition:transform .6s cubic-bezier(.23,1,.32,1);cursor:pointer; }
+    .av-main:hover { transform:perspective(1200px) rotateY(0) rotateX(0); }
+    .av-float { animation:avFloat 4s ease-in-out infinite; }
+    @keyframes avFloat { 0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-16px) rotate(4deg)} }
+    .av-badge { width:52%;height:220px;bottom:0;right:0;background:linear-gradient(145deg,var(--gold),#7a5010);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px; }
+    .av-badge h4 { font-family:'Playfair Display',serif;font-size:38px;font-weight:700;color:var(--green-deep); }
+    .av-badge p { font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:rgba(6,37,20,.65); }
+    .av-tag { position:absolute;top:28px;right:calc(30% + 20px);background:rgba(26,122,64,.9);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.15);border-radius:12px;padding:12px 16px;font-size:12px;font-weight:600;color:var(--white); }
+    .av-tag span { display:block;font-size:10px;color:rgba(255,255,255,.55);margin-top:3px;font-weight:400;letter-spacing:.5px; }
+    .about-text h2 { font-family:'Playfair Display',serif;font-size:clamp(32px,3.8vw,54px);font-weight:700;line-height:1.15;margin-bottom:22px; }
+    .about-text h2 em { font-style:italic;color:var(--green-light); }
+    .about-text .mission-quote { font-family:'Cormorant Garamond',serif;font-style:italic;font-size:19px;color:var(--gold-light);border-left:3px solid var(--gold);padding-left:18px;margin-bottom:22px;line-height:1.6; }
+    .about-text p { font-size:15px;line-height:1.85;color:var(--text-mid);font-weight:300;margin-bottom:16px; }
+    .about-pillars { display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:36px; }
+    .pillar { padding:20px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:14px;backdrop-filter:blur(10px);transition:all .35s; }
+    .pillar:hover { background:rgba(255,255,255,.1);transform:translateY(-4px);box-shadow:0 18px 36px rgba(0,0,0,.22); }
+    .pillar-icon { font-size:26px;margin-bottom:9px; }
+    .pillar h4 { font-size:13.5px;font-weight:600;margin-bottom:5px; }
+    .pillar p { font-size:12px;color:var(--text-faint);line-height:1.6;margin:0; }
+
+    /* ─── FOCUS AREAS ─────────────────────────────────────────────────── */
+    #focus { padding:120px 0;background:#041b0e; }
+    .focus-header { text-align:center;max-width:640px;margin:0 auto 72px; }
+    .focus-header h2 { font-family:'Playfair Display',serif;font-size:clamp(32px,3.8vw,56px);font-weight:700;line-height:1.15;margin-bottom:16px; }
+    .focus-header h2 em { font-style:italic;color:var(--gold-light); }
+    .focus-header p { color:var(--text-faint);font-size:15px;line-height:1.75;font-weight:300; }
+    .focus-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:28px; }
+    .focus-card { position:relative;border-radius:24px;overflow:hidden;height:480px;border:1px solid var(--glass-border);cursor:pointer;transition:all .5s cubic-bezier(.23,1,.32,1);background:linear-gradient(175deg,rgba(14,74,40,.5),rgba(6,37,20,.95)); }
+    .focus-card:hover { transform:perspective(900px) rotateX(-2deg) rotateY(3deg) translateY(-10px);box-shadow:0 36px 72px rgba(0,0,0,.5);border-color:rgba(26,122,64,.5); }
+    .fc-bg { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:150px;opacity:.1;transition:all .5s;filter:blur(3px); }
+    .focus-card:hover .fc-bg { opacity:.22;filter:blur(0); }
+    .fc-glow { position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);width:180px;height:180px;border-radius:50%;filter:blur(36px);opacity:0;transition:opacity .5s; }
+    .focus-card:hover .fc-glow { opacity:.42; }
+    .fc-content { position:absolute;inset:0;padding:32px;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(0deg,rgba(4,27,14,.95) 0%,transparent 55%); }
+    .fc-icon { width:52px;height:52px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:auto;backdrop-filter:blur(8px);transition:all .3s; }
+    .focus-card:hover .fc-icon { background:rgba(255,255,255,.12);transform:scale(1.1) rotate(5deg); }
+    .fc-tag { display:inline-block;padding:4px 12px;border-radius:99px;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;font-weight:600;margin-bottom:12px;width:fit-content; }
+    .fc-content h3 { font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:9px; }
+    .fc-content p { font-size:13px;color:var(--text-faint);line-height:1.65;font-weight:300;margin-bottom:20px; }
+    .fc-link { display:inline-flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:var(--gold-light);text-decoration:none;transition:gap .3s; }
+    .fc-link:hover { gap:13px; }
+    /* Per-card colours */
+    .card-ruminant .fc-glow { background:#2fb05a; }
+    .card-ruminant .fc-tag  { background:rgba(47,176,90,.18);color:var(--green-light);border:1px solid rgba(47,176,90,.35); }
+    .card-mono     .fc-glow { background:#d4743a; }
+    .card-mono     .fc-tag  { background:rgba(212,116,58,.18);color:#f0a870;border:1px solid rgba(212,116,58,.35); }
+    .card-sustain  .fc-glow { background:#1a6080; }
+    .card-sustain  .fc-tag  { background:rgba(26,96,128,.18);color:#7acff0;border:1px solid rgba(26,96,128,.35); }
+
+    /* ─── R&D / INNOVATION ────────────────────────────────────────────── */
+    #rnd { padding:130px 0;background:linear-gradient(180deg,#041b0e 0%,var(--green-deep) 100%); }
+    .rnd-grid { display:grid;grid-template-columns:1fr 1.1fr;gap:80px;align-items:center; }
+    .rnd-text h2 { font-family:'Playfair Display',serif;font-size:clamp(32px,3.8vw,54px);font-weight:700;line-height:1.15;margin-bottom:18px; }
+    .rnd-text h2 em { font-style:italic;color:var(--gold-light); }
+    .rnd-text p { font-size:15px;line-height:1.85;color:var(--text-mid);font-weight:300;margin-bottom:16px; }
+    .rnd-items { display:flex;flex-direction:column;gap:16px;margin-top:32px; }
+    .rnd-item { display:flex;align-items:flex-start;gap:16px;padding:18px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:14px;transition:all .3s; }
+    .rnd-item:hover { background:rgba(255,255,255,.09);transform:translateX(6px); }
+    .rnd-item-icon { width:44px;height:44px;border-radius:11px;background:linear-gradient(135deg,var(--green-bright),var(--green-mid));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0; }
+    .rnd-item h4 { font-size:14px;font-weight:600;margin-bottom:4px; }
+    .rnd-item p { font-size:12.5px;color:var(--text-faint);line-height:1.6;margin:0; }
+    .rnd-visual { position:relative; }
+    .rnd-main-card { background:linear-gradient(145deg,rgba(14,74,40,.7),rgba(4,27,14,.9));border:1px solid var(--glass-border);border-radius:24px;padding:44px;backdrop-filter:blur(12px); }
+    .rnd-main-card h3 { font-family:'Playfair Display',serif;font-size:28px;font-weight:700;margin-bottom:8px; }
+    .rnd-main-card .rnd-subtitle { font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);margin-bottom:28px; }
+    .rnd-stats-grid { display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:28px; }
+    .rnd-stat { padding:18px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:12px;text-align:center; }
+    .rnd-stat h4 { font-family:'Playfair Display',serif;font-size:28px;font-weight:700;background:linear-gradient(135deg,var(--white),var(--gold-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent; }
+    .rnd-stat p { font-size:11px;color:var(--text-faint);letter-spacing:1px;text-transform:uppercase;margin-top:4px; }
+    .rnd-papers { display:flex;flex-direction:column;gap:10px; }
+    .rnd-paper { display:flex;align-items:center;gap:12px;padding:12px 14px;background:rgba(255,255,255,.04);border-radius:10px;border:1px solid rgba(255,255,255,.07);font-size:12.5px;color:var(--text-mid);transition:all .3s;cursor:pointer;text-decoration:none; }
+    .rnd-paper:hover { background:rgba(255,255,255,.09);color:var(--white); }
+    .rnd-paper-icon { font-size:16px;flex-shrink:0; }
+    .rnd-paper-badge { margin-left:auto;padding:3px 9px;border-radius:99px;font-size:10px;font-weight:600;background:rgba(26,122,64,.25);color:var(--green-light);border:1px solid rgba(26,122,64,.3); }
+
+    /* ─── PRODUCTS / PHYTOGENICS ──────────────────────────────────────── */
+    #products { padding:130px 0;background:var(--green-deep);overflow:hidden; }
+    .products-header { text-align:center;max-width:660px;margin:0 auto 72px; }
+    .products-header h2 { font-family:'Playfair Display',serif;font-size:clamp(32px,3.8vw,56px);font-weight:700;line-height:1.15;margin-bottom:16px; }
+    .products-header h2 em { font-style:italic;color:var(--green-light); }
+    .products-header p { color:var(--text-faint);font-size:15px;line-height:1.75;font-weight:300; }
+    .products-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:24px; }
+    .prod-card { border-radius:20px;overflow:hidden;background:linear-gradient(170deg,rgba(14,74,40,.45),rgba(4,27,14,.92));border:1px solid var(--glass-border);padding:32px;transition:all .4s cubic-bezier(.23,1,.32,1);cursor:pointer;position:relative; }
+    .prod-card:hover { transform:translateY(-8px);box-shadow:0 28px 56px rgba(0,0,0,.4);border-color:rgba(26,122,64,.45); }
+    .prod-card-header { display:flex;align-items:center;gap:14px;margin-bottom:20px; }
+    .prod-icon { width:52px;height:52px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0; }
+    .prod-name { font-family:'Playfair Display',serif;font-size:18px;font-weight:600;line-height:1.3; }
+    .prod-tag { font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);margin-top:2px; }
+    .prod-desc { font-size:13px;color:var(--text-faint);line-height:1.7;margin-bottom:20px;font-weight:300; }
+    .prod-benefits { display:flex;flex-wrap:wrap;gap:7px; }
+    .prod-chip { padding:4px 11px;border-radius:99px;font-size:10.5px;font-weight:500;background:rgba(47,176,90,.12);color:var(--green-light);border:1px solid rgba(47,176,90,.25); }
+    /* wide card */
+    .prod-card-wide { grid-column:span 2; }
+
+    /* ─── EVENTS ──────────────────────────────────────────────────────── */
+    #events { padding:120px 0;background:#041b0e; }
+    .events-header { text-align:center;max-width:600px;margin:0 auto 68px; }
+    .events-header h2 { font-family:'Playfair Display',serif;font-size:clamp(32px,3.8vw,54px);font-weight:700;margin-bottom:14px; }
+    .events-header h2 em { font-style:italic;color:var(--gold-light); }
+    .events-grid { display:grid;grid-template-columns:1.4fr 1fr;gap:28px; }
+    .event-card { border-radius:22px;overflow:hidden;border:1px solid var(--glass-border);background:linear-gradient(160deg,rgba(14,74,40,.4),rgba(4,27,14,.9));transition:all .4s cubic-bezier(.23,1,.32,1);cursor:pointer; }
+    .event-card:hover { transform:translateY(-8px);box-shadow:0 28px 56px rgba(0,0,0,.45);border-color:rgba(201,144,42,.4); }
+    .ec-top { padding:28px 28px 20px;position:relative; }
+    .ec-type { display:inline-block;padding:5px 13px;border-radius:99px;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;font-weight:600;margin-bottom:14px; }
+    .ec-upcoming .ec-type { background:rgba(201,144,42,.2);color:var(--gold-light);border:1px solid rgba(201,144,42,.35); }
+    .ec-past     .ec-type { background:rgba(255,255,255,.06);color:var(--text-faint);border:1px solid rgba(255,255,255,.1); }
+    .ec-top h3 { font-family:'Playfair Display',serif;font-size:22px;font-weight:700;line-height:1.3;margin-bottom:10px; }
+    .ec-top p { font-size:13px;color:var(--text-faint);line-height:1.65;font-weight:300; }
+    .ec-meta { padding:18px 28px;border-top:1px solid rgba(255,255,255,.06);display:flex;gap:20px;align-items:center; }
+    .ec-meta-item { display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-faint); }
+    .ec-meta-item span { font-size:14px; }
+    .events-sidebar { display:flex;flex-direction:column;gap:20px; }
+    .event-mini { border-radius:16px;border:1px solid var(--glass-border);background:rgba(255,255,255,.04);padding:22px;transition:all .35s;cursor:pointer; }
+    .event-mini:hover { background:rgba(255,255,255,.08);transform:translateX(5px); }
+    .em-date { font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px;font-weight:600; }
+    .event-mini h4 { font-size:14.5px;font-weight:600;margin-bottom:5px;line-height:1.35; }
+    .event-mini p { font-size:12px;color:var(--text-faint); }
+
+    /* ─── INSIGHTS / BLOGS ────────────────────────────────────────────── */
+    #insights { padding:120px 0;background:var(--green-deep); }
+    .insights-header { margin-bottom:64px; }
+    .insights-header h2 { font-family:'Playfair Display',serif;font-size:clamp(32px,3.8vw,54px);font-weight:700;line-height:1.15;margin-bottom:14px; }
+    .insights-header h2 em { font-style:italic;color:var(--green-light); }
+    .insights-header p { color:var(--text-faint);font-size:15px;line-height:1.7;font-weight:300;max-width:540px; }
+    .insights-grid { display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:24px; }
+    .insight-card { border-radius:20px;border:1px solid var(--glass-border);background:linear-gradient(160deg,rgba(14,74,40,.35),rgba(4,27,14,.9));overflow:hidden;transition:all .4s cubic-bezier(.23,1,.32,1);cursor:pointer; }
+    .insight-card:hover { transform:translateY(-7px);box-shadow:0 24px 50px rgba(0,0,0,.4);border-color:rgba(47,176,90,.35); }
+    .insight-card-main { grid-row:span 2; }
+    .ic-img { height:200px;display:flex;align-items:center;justify-content:center;font-size:80px;background:linear-gradient(135deg,rgba(26,122,64,.3),rgba(14,74,40,.6)); }
+    .insight-card-main .ic-img { height:280px;font-size:110px; }
+    .ic-body { padding:24px; }
+    .ic-cat { display:inline-block;padding:4px 12px;border-radius:99px;font-size:10px;letter-spacing:1.8px;text-transform:uppercase;font-weight:600;background:rgba(47,176,90,.15);color:var(--green-light);border:1px solid rgba(47,176,90,.28);margin-bottom:12px; }
+    .ic-body h3 { font-family:'Playfair Display',serif;font-size:19px;font-weight:600;line-height:1.35;margin-bottom:10px; }
+    .insight-card-main .ic-body h3 { font-size:24px; }
+    .ic-body p { font-size:13px;color:var(--text-faint);line-height:1.65;margin-bottom:16px;font-weight:300; }
+    .ic-meta { display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:var(--text-faint); }
+    .ic-read { color:var(--gold-light);font-weight:600;text-decoration:none;transition:gap .25s; }
+
+    /* ─── GLOBAL REACH ────────────────────────────────────────────────── */
+    #global { padding:120px 0;background:#041b0e; }
+    .global-inner { display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center; }
+    .global-text h2 { font-family:'Playfair Display',serif;font-size:clamp(32px,3.8vw,54px);font-weight:700;line-height:1.15;margin-bottom:18px; }
+    .global-text h2 em { font-style:italic;color:var(--gold-light); }
+    .global-text p { font-size:15px;line-height:1.85;color:var(--text-mid);font-weight:300;margin-bottom:20px; }
+    .global-stats { display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:36px; }
+    .gs-item { text-align:center;padding:22px 14px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:14px;transition:all .35s; }
+    .gs-item:hover { background:rgba(255,255,255,.1);transform:translateY(-4px); }
+    .gs-item h3 { font-family:'Playfair Display',serif;font-size:32px;font-weight:700;background:linear-gradient(135deg,var(--white),var(--gold-light));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent; }
+    .gs-item p { font-size:11px;color:var(--text-faint);letter-spacing:1.2px;text-transform:uppercase;margin-top:5px; }
+    .globe-visual { position:relative;height:420px;display:flex;align-items:center;justify-content:center; }
+    .globe-ring { position:absolute;border-radius:50%;border:1px solid; }
+    .gr1 { width:340px;height:340px;border-color:rgba(47,176,90,.2);animation:spinRing 18s linear infinite; }
+    .gr2 { width:250px;height:250px;border-color:rgba(201,144,42,.15);animation:spinRing 12s linear infinite reverse; }
+    .gr3 { width:160px;height:160px;border-color:rgba(47,176,90,.1);animation:spinRing 8s linear infinite; }
+    @keyframes spinRing { to { transform:rotate(360deg); } }
+    .globe-center { position:relative;z-index:2;font-size:80px;animation:avFloat 5s ease-in-out infinite; }
+    .globe-dot { position:absolute;width:9px;height:9px;border-radius:50%;background:var(--green-light);box-shadow:0 0 12px var(--green-light); }
+    .gd1{top:10%;left:50%;animation:pulseDot 2.5s ease infinite}.gd2{top:50%;left:5%;animation:pulseDot 2.5s ease .5s infinite;background:var(--gold-light);box-shadow:0 0 12px var(--gold-light)}.gd3{top:70%;left:75%;animation:pulseDot 2.5s ease 1s infinite}.gd4{top:30%;right:5%;animation:pulseDot 2.5s ease 1.5s infinite;background:var(--gold-light);box-shadow:0 0 12px var(--gold-light)}.gd5{bottom:10%;left:35%;animation:pulseDot 2.5s ease 2s infinite}
+
+    /* ─── VERTICALS ───────────────────────────────────────────────────── */
+    #verticals { padding:100px 0;background:var(--green-deep); }
+    .vert-header { text-align:center;margin-bottom:60px; }
+    .vert-header h2 { font-family:'Playfair Display',serif;font-size:clamp(28px,3.5vw,48px);font-weight:700;margin-bottom:14px; }
+    .vert-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:28px; }
+    .vert-card { border-radius:22px;padding:40px 32px;text-align:center;border:1px solid var(--glass-border);background:var(--glass-bg);backdrop-filter:blur(10px);transition:all .4s cubic-bezier(.23,1,.32,1);cursor:pointer;position:relative;overflow:hidden; }
+    .vert-card::before { content:'';position:absolute;inset:0;opacity:0;transition:opacity .4s; }
+    .vert-animal::before  { background:radial-gradient(circle at 50% 0%,rgba(47,176,90,.15),transparent 70%); }
+    .vert-human::before   { background:radial-gradient(circle at 50% 0%,rgba(201,144,42,.12),transparent 70%); }
+    .vert-pet::before     { background:radial-gradient(circle at 50% 0%,rgba(26,96,128,.15),transparent 70%); }
+    .vert-card:hover::before { opacity:1; }
+    .vert-card:hover { transform:translateY(-10px);box-shadow:0 28px 56px rgba(0,0,0,.35); }
+    .vert-icon { font-size:52px;margin-bottom:18px;display:block;position:relative;z-index:1; }
+    .vert-card h3 { font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:10px;position:relative;z-index:1; }
+    .vert-card p { font-size:13.5px;color:var(--text-faint);line-height:1.7;margin-bottom:22px;font-weight:300;position:relative;z-index:1; }
+    .vert-link { display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;color:var(--gold-light);text-decoration:none;position:relative;z-index:1;transition:gap .3s; }
+    .vert-link:hover { gap:13px; }
+
+    /* ─── CONTACT FORM ────────────────────────────────────────────────── */
+    #contact { padding:130px 0;background:#041b0e; }
+    .contact-inner { display:grid;grid-template-columns:1fr 1.2fr;gap:80px;align-items:start; }
+    .contact-info h2 { font-family:'Playfair Display',serif;font-size:clamp(28px,3.5vw,50px);font-weight:700;line-height:1.15;margin-bottom:16px; }
+    .contact-info h2 em { font-style:italic;color:var(--gold-light); }
+    .contact-info p { font-size:15px;color:var(--text-mid);line-height:1.8;margin-bottom:32px;font-weight:300; }
+    .contact-detail { display:flex;align-items:flex-start;gap:14px;margin-bottom:20px; }
+    .cd-icon { width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,var(--green-bright),var(--green-mid));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+    .cd-label { font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-faint);margin-bottom:3px;font-weight:600; }
+    .cd-value { font-size:14px;color:var(--white);font-weight:500;line-height:1.5; }
+    /* Form */
+    .contact-form-wrap { background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:24px;padding:44px;backdrop-filter:blur(16px); }
+    .contact-form-wrap h3 { font-family:'Playfair Display',serif;font-size:24px;font-weight:700;margin-bottom:6px; }
+    .contact-form-wrap .form-sub { font-size:13px;color:var(--text-faint);margin-bottom:28px; }
+    .form-row { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+    .form-group { margin-bottom:18px; }
+    .form-group label { display:block;font-size:11.5px;letter-spacing:1px;text-transform:uppercase;color:var(--text-faint);font-weight:600;margin-bottom:7px; }
+    .form-group input,
+    .form-group select,
+    .form-group textarea { width:100%;padding:13px 16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:11px;color:var(--white);font-size:13.5px;font-family:'Inter',sans-serif;outline:none;transition:all .3s;resize:none; }
+    .form-group input::placeholder,
+    .form-group textarea::placeholder { color:rgba(255,255,255,.28); }
+    .form-group select option { background:#0e4a28; }
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus { border-color:var(--green-light);background:rgba(255,255,255,.1);box-shadow:0 0 0 3px rgba(47,176,90,.15); }
+    .form-submit { width:100%;padding:15px;background:linear-gradient(135deg,var(--green-bright),var(--green-mid));color:var(--white);border:none;border-radius:99px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s;box-shadow:0 8px 24px rgba(26,122,64,.4); }
+    .form-submit:hover { transform:translateY(-2px);box-shadow:0 12px 32px rgba(26,122,64,.55); }
+    .form-submit:disabled { opacity:.6;cursor:not-allowed;transform:none; }
+    .form-note { text-align:center;font-size:11.5px;color:var(--text-faint);margin-top:14px;line-height:1.6; }
+    /* Success/Error states */
+    .form-toast { display:none;padding:14px 18px;border-radius:12px;font-size:13px;font-weight:500;margin-bottom:18px;text-align:center; }
+    .form-toast.success { display:block;background:rgba(47,176,90,.2);border:1px solid rgba(47,176,90,.35);color:var(--green-light); }
+    .form-toast.error   { display:block;background:rgba(212,74,74,.2);border:1px solid rgba(212,74,74,.35);color:#f0a0a0; }
+
+    /* ─── TESTIMONIALS ────────────────────────────────────────────────── */
+    #testimonials { padding:120px 0;background:var(--green-deep);overflow:hidden; }
+    .testi-header { text-align:center;margin-bottom:64px; }
+    .testi-header h2 { font-family:'Playfair Display',serif;font-size:clamp(32px,3.8vw,54px);font-weight:700; }
+    .testi-header h2 em { font-style:italic;color:var(--green-light); }
+    .testi-track { display:flex;gap:24px;animation:testiScroll 42s linear infinite; }
+    .testi-track:hover { animation-play-state:paused; }
+    @keyframes testiScroll { from{transform:translateX(0)}to{transform:translateX(-50%)} }
+    .t-card { flex-shrink:0;width:360px;padding:32px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:22px;backdrop-filter:blur(12px);transition:all .3s; }
+    .t-card:hover { background:rgba(255,255,255,.1);transform:translateY(-5px); }
+    .t-stars { display:flex;gap:3px;margin-bottom:16px;color:var(--gold);font-size:15px; }
+    .t-card blockquote { font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px;color:rgba(255,255,255,.82);line-height:1.65;margin-bottom:22px; }
+    .t-author { display:flex;align-items:center;gap:12px; }
+    .t-avatar { width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--green-bright),var(--green-mid));display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0; }
+    .t-name { font-size:13.5px;font-weight:600; }
+    .t-role { font-size:11.5px;color:var(--text-faint);margin-top:2px; }
+
+    /* ─── FOOTER ──────────────────────────────────────────────────────── */
+    footer { background:#020e06;padding:80px 6vw 32px;border-top:1px solid rgba(255,255,255,.05); }
+    .footer-grid { max-width:1280px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;gap:52px;padding-bottom:56px;border-bottom:1px solid rgba(255,255,255,.05);margin-bottom:36px; }
+    .footer-brand .nav-logo { margin-bottom:16px;display:inline-flex; }
+    .footer-brand p { font-size:13px;color:rgba(255,255,255,.35);line-height:1.8;max-width:270px;font-weight:300; }
+    .footer-socials { display:flex;gap:10px;margin-top:22px; }
+    .f-social { width:36px;height:36px;border-radius:9px;background:var(--glass-bg);border:1px solid var(--glass-border);display:flex;align-items:center;justify-content:center;font-size:14px;text-decoration:none;transition:all .3s; }
+    .f-social:hover { background:rgba(255,255,255,.12);transform:translateY(-3px); }
+    .footer-col h5 { font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--gold);font-weight:600;margin-bottom:20px; }
+    .footer-col ul { list-style:none;display:flex;flex-direction:column;gap:11px; }
+    .footer-col ul li a { font-size:13px;color:rgba(255,255,255,.37);text-decoration:none;transition:color .25s;font-weight:300; }
+    .footer-col ul li a:hover { color:rgba(255,255,255,.8); }
+    .footer-bottom { max-width:1280px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;font-size:11.5px;color:rgba(255,255,255,.2); }
+    .footer-bottom a { color:rgba(255,255,255,.3);text-decoration:none;transition:color .25s; }
+    .footer-bottom a:hover { color:rgba(255,255,255,.65); }
+    .footer-locations { margin-top:20px;padding:18px;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;font-size:12px;color:var(--text-faint);line-height:1.8; }
+    .footer-locations strong { color:var(--gold);display:block;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px; }
+
+    /* ─── RESPONSIVE ──────────────────────────────────────────────────── */
+    @media(max-width:1100px) {
+      .about-grid,.rnd-grid,.global-inner,.contact-inner { grid-template-columns:1fr; gap:48px; }
+      .focus-grid { grid-template-columns:1fr 1fr; }
+      .card-sustain { grid-column:span 2; }
+      .products-grid { grid-template-columns:1fr 1fr; }
+      .prod-card-wide { grid-column:span 2; }
+      .events-grid { grid-template-columns:1fr; }
+      .insights-grid { grid-template-columns:1fr 1fr; }
+      .insight-card-main { grid-column:span 2; }
+      .footer-grid { grid-template-columns:1fr 1fr; gap:36px; }
+      .vert-grid { grid-template-columns:1fr 1fr; }
+    }
+    /* ─── HAMBURGER ─────────────────────────────────────────────────── */
+    .nav-burger { display:none;flex-direction:column;justify-content:center;gap:5px;background:none;border:none;cursor:pointer;padding:8px;z-index:1002;flex-shrink:0; }
+    .nav-burger span { display:block;width:24px;height:2px;background:var(--white);border-radius:2px;transition:transform .3s,opacity .3s; }
+    .nav-burger.active span:nth-child(1) { transform:translateY(7px) rotate(45deg); }
+    .nav-burger.active span:nth-child(2) { opacity:0; }
+    .nav-burger.active span:nth-child(3) { transform:translateY(-7px) rotate(-45deg); }
+
+    @media(max-width:768px) {
+      .nav-burger { display:flex; }
+      .nav-links { display:none; }
+      .nav-links.mobile-open { display:flex !important;flex-direction:column;position:fixed;inset:0;padding:100px 8vw 48px;background:rgba(6,37,20,.97);backdrop-filter:blur(24px);z-index:1001;gap:26px;align-items:flex-start;overflow-y:auto; }
+      .nav-links.mobile-open li { width:100%; }
+      .nav-links.mobile-open a { font-size:20px;color:var(--white);letter-spacing:0; }
+      .nav-links.mobile-open .nav-cta { display:inline-flex;margin-top:8px; }
+      .nav-dropdown-menu { display:none !important; }
+      .lang-bar { display:none; }
+      .focus-grid,.products-grid,.vert-grid,.about-pillars { grid-template-columns:1fr; }
+      .card-sustain,.prod-card-wide,.insight-card-main { grid-column:span 1; }
+      .insights-grid,.global-stats,.form-row { grid-template-columns:1fr; }
+      .hero-spline { opacity:.2;width:100vw;right:0; }
+      body { cursor:auto; }
+      #cursor,#cursor-ring { display:none; }
+      .footer-grid { grid-template-columns:1fr; }
+      .footer-bottom { flex-direction:column;gap:10px;text-align:center; }
+    }
+
+    /* ─── MESH BG ─────────────────────────────────────────────────────── */
+    .mesh { position:absolute;inset:0;background:radial-gradient(ellipse 55% 55% at 20% 45%,rgba(26,122,64,.11) 0%,transparent 60%),radial-gradient(ellipse 40% 55% at 80% 55%,rgba(201,144,42,.05) 0%,transparent 60%);pointer-events:none; }
+
+    /* ─── LOGO IMAGE ───────────────────────────────────────────────────── */
+    .nav-logo-img { height:48px;width:auto;object-fit:contain;display:block;transition:filter .3s,opacity .3s; }
+    nav.scrolled .nav-logo-img { filter:brightness(1.05); }
+    .footer-logo-img { height:52px;width:auto;object-fit:contain;display:block;margin-bottom:18px; }
+    .loader-logo-img { height:56px;width:auto;object-fit:contain;opacity:0;animation:fadeUp .8s ease .3s forwards; }
+
+    /* ─── HERO BACKGROUND PHOTO ───────────────────────────────────────── */
+    .hero-bg-photo { position:absolute;inset:0;z-index:0;overflow:hidden; }
+    .hero-bg-photo img { width:100%;height:100%;object-fit:cover;object-position:center 60%;opacity:.15;filter:saturate(1.2) brightness(.9);transition:opacity 1s ease; }
+
+    /* ─── ABOUT VISUAL PHOTO ──────────────────────────────────────────── */
+    .av-photo { width:100%;height:100%;object-fit:cover;object-position:center;display:block;transition:transform .6s cubic-bezier(.23,1,.32,1); }
+    .av-main:hover .av-photo { transform:scale(1.04); }
+    .av-main { padding:0!important; }
+
+    /* ─── FOCUS CARD PHOTO ────────────────────────────────────────────── */
+    .fc-photo { position:absolute;inset:0;z-index:0;overflow:hidden; }
+    .fc-photo img { width:100%;height:100%;object-fit:cover;object-position:center;opacity:.28;transition:opacity .5s ease,transform .6s cubic-bezier(.23,1,.32,1); }
+    .focus-card:hover .fc-photo img { opacity:.42;transform:scale(1.05); }
+    /* Bring all existing fc-* elements above the photo */
+    .fc-bg,.fc-glow,.fc-content { z-index:1; }
+
+    /* ─── R&D TOP PHOTO ───────────────────────────────────────────────── */
+    .rnd-card-photo { width:100%;height:180px;object-fit:cover;object-position:center 40%;border-radius:16px;margin-bottom:28px;display:block;filter:saturate(1.1); }
+
+    /* ─── BLOG IMAGE ──────────────────────────────────────────────────── */
+    .ic-img img { width:100%;height:100%;object-fit:cover;object-position:center;display:block;transition:transform .5s cubic-bezier(.23,1,.32,1); }
+    .insight-card:hover .ic-img img { transform:scale(1.05); }
+    .ic-img { overflow:hidden; }
+
+    /* ─── EVENT CARD PHOTO ────────────────────────────────────────────── */
+    .ec-photo { width:100%;height:200px;object-fit:cover;object-position:center;display:block;opacity:.85; }
+    .ec-upcoming .ec-photo { filter:saturate(1.1) brightness(.9); }
+  </style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <img src="https://www.naturalremedy.com/wp-content/uploads/2025/08/NR-New-logo-r.webp"
+       alt="Natural Remedies" class="loader-logo-img" />
+  <div class="l-bar"><div class="l-fill"></div></div>
+  <div class="l-sub">Leading Innovations In Animal Nutrition &amp; Healthcare</div>
+</div>
+
+<!-- LANG BAR -->
+<div class="lang-bar" style="padding-top:6px;padding-bottom:6px;">
+  <a href="#">Home</a>
+  <a href="#about">About Us</a>
+  <a href="#focus">Products</a>
+  <a href="#rnd">Our Expertise</a>
+  <a href="#insights">Blogs &amp; Insights</a>
+  <a href="#events">Events</a>
+  <a href="#contact">Careers</a>
+  <a href="#verticals">Sustainability</a>
+  <div class="lang-selector">🌐 Language (20+ Countries) ▾</div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar" style="top:36px;">
+  <a href="#" class="nav-logo">
+    <img src="https://www.naturalremedy.com/wp-content/uploads/2025/08/NR-New-logo-r.webp"
+         alt="Natural Remedies" class="nav-logo-img" />
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li class="nav-dropdown">
+      <a href="#focus">Products ▾</a>
+      <div class="nav-dropdown-menu">
+        <a href="#focus">🐄 Ruminants</a>
+        <a href="#focus">🐔 Monogastrics</a>
+        <a href="#products">🌿 Phytogenics</a>
+        <a href="#verticals">🐾 Pet Care</a>
+      </div>
+    </li>
+    <li><a href="#rnd">Innovation</a></li>
+    <li><a href="#events">Events</a></li>
+    <li><a href="#insights">Insights</a></li>
+    <li><a href="#contact" class="nav-cta">Contact Us</a></li>
+  </ul>
+  <button class="nav-burger" id="nav-burger" aria-label="Toggle navigation">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ══════════════ HERO ══════════════ -->
+<section id="hero">
+  <canvas id="three-canvas"></canvas>
+
+  <!-- Full-bleed background photo (lush green farmland) -->
+  <div class="hero-bg-photo">
+    <img src="https://images.unsplash.com/photo-1464226184884-fa280b87c399?auto=format&fit=crop&w=1920&q=80"
+         alt="" loading="eager" />
+  </div>
+
+  <div class="hero-mesh"></div>
+
+  <!-- Hero right-side photo panel (replaces/overlays Spline) -->
+  <div class="hero-spline" style="display:flex;flex-direction:column;gap:16px;padding:20px;overflow:hidden;border-radius:0 0 0 60px;background:none;">
+    <div style="flex:1.2;border-radius:24px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5);position:relative;">
+      <img src="https://images.unsplash.com/photo-1484557985045-edf25e08da73?auto=format&fit=crop&w=900&q=85"
+           alt="Dairy cattle herd" style="width:100%;height:100%;object-fit:cover;object-position:center;display:block;" />
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(6,37,20,.45),transparent 60%);"></div>
+    </div>
+    <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div style="border-radius:20px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);position:relative;">
+        <img src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=500&q=85"
+             alt="Poultry flock" style="width:100%;height:100%;object-fit:cover;display:block;" />
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(6,37,20,.7));display:flex;align-items:flex-end;padding:14px;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.8);">Monogastrics</span>
+        </div>
+      </div>
+      <div style="border-radius:20px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.45);position:relative;">
+        <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=500&q=85"
+             alt="R&D Laboratory" style="width:100%;height:100%;object-fit:cover;display:block;" />
+        <div style="position:absolute;inset:0;background:linear-gradient(180deg,transparent 50%,rgba(6,37,20,.7));display:flex;align-items:flex-end;padding:14px;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.8);">Innovation</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-content">
+    <div class="hero-badge" id="hbadge">
+      <div class="badge-dot"></div>
+      30+ Years · Phytogenics Pioneers
+    </div>
+    <h1 class="hero-h1" id="hh1">
+      Leading <em>Innovations</em><br/>In Animal Nutrition<br/>&amp; Healthcare
+    </h1>
+    <div class="hero-tagline" id="htagline">"We harness nature and apply science for health and happiness sustainably."</div>
+    <p class="hero-sub" id="hsub">
+      Pioneers in phytogenics — standardized botanical powders and extracts delivering proven health outcomes for ruminants and monogastrics across 45+ countries.
+    </p>
+    <div class="hero-actions" id="hactions">
+      <a href="#focus" class="btn-primary">
+        Explore Solutions
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+      <a href="#rnd" class="btn-outline">
+        Our Innovation Centre
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-stats" id="hstats">
+    <div class="h-stat"><h3 id="sc1">0+</h3><p>Years Experience</p></div>
+    <div class="stat-div"></div>
+    <div class="h-stat"><h3 id="sc2">0+</h3><p>Countries</p></div>
+    <div class="stat-div"></div>
+    <div class="h-stat"><h3 id="sc3">0+</h3><p>Product Range</p></div>
+    <div class="stat-div"></div>
+    <div class="h-stat"><h3 id="sc4">0</h3><p>Languages Supported</p></div>
+  </div>
+  <div class="scroll-cue"><div class="scroll-line"></div>Scroll</div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-inner">
+    <div class="m-item"><span>🌿</span> Phytogenics Specialists</div>
+    <div class="m-item"><span>🐄</span> Ruminant Health Solutions</div>
+    <div class="m-item"><span>🐔</span> Monogastric Nutrition</div>
+    <div class="m-item"><span>🔬</span> World-Class R&amp;D Centre</div>
+    <div class="m-item"><span>🌍</span> Present in 45+ Countries</div>
+    <div class="m-item"><span>📋</span> Ayurveda-Backed Science</div>
+    <div class="m-item"><span>♻️</span> Sustainability Committed</div>
+    <div class="m-item"><span>🏆</span> 30+ Years of Excellence</div>
+    <div class="m-item"><span>🌿</span> Phytogenics Specialists</div>
+    <div class="m-item"><span>🐄</span> Ruminant Health Solutions</div>
+    <div class="m-item"><span>🐔</span> Monogastric Nutrition</div>
+    <div class="m-item"><span>🔬</span> World-Class R&amp;D Centre</div>
+    <div class="m-item"><span>🌍</span> Present in 45+ Countries</div>
+    <div class="m-item"><span>📋</span> Ayurveda-Backed Science</div>
+    <div class="m-item"><span>♻️</span> Sustainability Committed</div>
+    <div class="m-item"><span>🏆</span> 30+ Years of Excellence</div>
+  </div>
+</div>
+
+<!-- ══════════════ ABOUT ══════════════ -->
+<section id="about">
+  <div class="mesh"></div>
+  <div class="s-inner">
+    <div class="about-grid">
+      <div class="about-visual reveal">
+        <div class="av-card av-main" id="av3d">
+          <img src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=700&q=85"
+               alt="Cattle grazing in green pasture" class="av-photo" />
+        </div>
+        <div class="av-card av-badge">
+          <h4>30+</h4>
+          <p>Years of Expertise</p>
+        </div>
+        <div class="av-tag">
+          45+ Countries
+          <span>Global Presence</span>
+        </div>
+      </div>
+      <div class="about-text">
+        <div class="s-label reveal">Our Story</div>
+        <h2 class="reveal rd1">
+          <em>Three Decades</em> of<br/>Animal Health Innovation
+        </h2>
+        <p class="mission-quote reveal rd2">
+          "We harness nature and apply science for health and happiness sustainably."
+        </p>
+        <p class="reveal rd2">
+          Natural Remedies is a global animal healthcare company with over three decades of experience. We focus on innovating and developing natural solutions for veterinarians and livestock producers to facilitate profitable farming practices.
+        </p>
+        <p class="reveal rd3">
+          Our solutions are deeply rooted in the Indian system of medicine — Ayurveda — backed by rigorous research-based science. We are pioneers in phytogenics, specializing in standardized botanical powders and extracts that offer a high margin of safety and efficacy for target animal species.
+        </p>
+        <div class="about-pillars reveal rd3">
+          <div class="pillar">
+            <div class="pillar-icon">🌿</div>
+            <h4>Phytogenics</h4>
+            <p>Standardized botanical extracts for proven animal health outcomes.</p>
+          </div>
+          <div class="pillar">
+            <div class="pillar-icon">🔬</div>
+            <h4>Science-Backed</h4>
+            <p>Transcriptome analysis and polyherbal formulation research.</p>
+          </div>
+          <div class="pillar">
+            <div class="pillar-icon">📋</div>
+            <h4>Ayurvedic Roots</h4>
+            <p>Ancient Indian medicine meeting modern veterinary science.</p>
+          </div>
+          <div class="pillar">
+            <div class="pillar-icon">🌱</div>
+            <h4>Sustainability</h4>
+            <p>Committed to ecological farming and natural alternatives to synthetics.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FOCUS AREAS ══════════════ -->
+<section id="focus">
+  <div class="s-inner">
+    <div class="focus-header">
+      <div class="s-label reveal" style="justify-content:center;">Core Focus Areas</div>
+      <h2 class="reveal rd1">Targeted Solutions for<br/><em>Every Animal Category</em></h2>
+      <p class="reveal rd2">From cattle and dairy cows to poultry and swine — our phytogenic solutions are scientifically formulated for each species' unique nutritional and health requirements.</p>
+    </div>
+    <div class="focus-grid">
+      <!-- Ruminants -->
+      <div class="focus-card card-ruminant reveal">
+        <div class="fc-photo">
+          <img src="https://images.unsplash.com/photo-1484557985045-edf25e08da73?auto=format&fit=crop&w=800&q=80"
+               alt="Dairy cattle herd" loading="lazy" />
+        </div>
+        <div class="fc-bg">🐄</div>
+        <div class="fc-glow"></div>
+        <div class="fc-content">
+          <div class="fc-icon">🐄</div>
+          <div class="fc-tag">Ruminants</div>
+          <h3>Ruminant Health &amp; Nutrition</h3>
+          <p>Comprehensive phytogenic solutions for cattle, dairy cows, sheep, and goats. Optimise rumen function, milk production, and reproductive performance.</p>
+          <a href="#" class="fc-link">View Products →</a>
+        </div>
+      </div>
+      <!-- Monogastrics -->
+      <div class="focus-card card-mono reveal rd1">
+        <div class="fc-photo">
+          <img src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=800&q=80"
+               alt="Free-range poultry flock" loading="lazy" />
+        </div>
+        <div class="fc-bg">🐔</div>
+        <div class="fc-glow"></div>
+        <div class="fc-content">
+          <div class="fc-icon">🐔</div>
+          <div class="fc-tag">Monogastrics</div>
+          <h3>Poultry &amp; Swine Solutions</h3>
+          <p>Targeted nutrition and health programmes for broilers, layers, breeders, and pigs. Improve FCR, gut health, and immunity without antibiotics.</p>
+          <a href="#" class="fc-link">View Products →</a>
+        </div>
+      </div>
+      <!-- Sustainability -->
+      <div class="focus-card card-sustain reveal rd2">
+        <div class="fc-photo">
+          <img src="https://images.unsplash.com/photo-1523741543316-beb7fc7023d8?auto=format&fit=crop&w=800&q=80"
+               alt="Sustainable green farmland" loading="lazy" />
+        </div>
+        <div class="fc-bg">♻️</div>
+        <div class="fc-glow"></div>
+        <div class="fc-content">
+          <div class="fc-icon">♻️</div>
+          <div class="fc-tag">Sustainability Journey</div>
+          <h3>Our Sustainability Commitment</h3>
+          <p>Driving profitable farming practices while minimising environmental footprint. Our plant-based alternatives replace synthetic additives responsibly.</p>
+          <a href="#" class="fc-link">Learn More →</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ R&D / INNOVATION ══════════════ -->
+<section id="rnd">
+  <div class="mesh"></div>
+  <div class="s-inner">
+    <div class="rnd-grid">
+      <div class="rnd-text">
+        <div class="s-label reveal">Innovation Centre</div>
+        <h2 class="reveal rd1">Natural Remedies<br/><em>Innovation Centre</em></h2>
+        <p class="reveal rd2">Our world-class R&amp;D centre leads robust scientific evaluations — from transcriptome analysis to evaluating polyherbal formulations as substitutes for synthetic alternatives like synthetic choline chloride.</p>
+        <p class="reveal rd3">Every product is the outcome of rigorous scientific inquiry, validated through multiple study designs and peer review, before reaching the hands of veterinarians and livestock producers worldwide.</p>
+        <div class="rnd-items reveal rd3">
+          <div class="rnd-item">
+            <div class="rnd-item-icon">📊</div>
+            <div>
+              <h4>Research Bulletins</h4>
+              <p>In-depth technical bulletins on phytogenic efficacy, dosing, and species response data.</p>
+            </div>
+          </div>
+          <div class="rnd-item">
+            <div class="rnd-item-icon">🧬</div>
+            <div>
+              <h4>Technical Case Studies</h4>
+              <p>Real-world farm trials demonstrating measurable improvements in production parameters.</p>
+            </div>
+          </div>
+          <div class="rnd-item">
+            <div class="rnd-item-icon">📝</div>
+            <div>
+              <h4>Research Articles</h4>
+              <p>Peer-reviewed publications validating the science behind every formulation.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="rnd-visual reveal rd1">
+        <div class="rnd-main-card">
+          <img src="https://images.unsplash.com/photo-1582719508461-905c673771fd?auto=format&fit=crop&w=900&q=85"
+               alt="Natural Remedies Innovation Centre Laboratory" class="rnd-card-photo" loading="lazy" />
+          <h3>R&amp;D Highlights</h3>
+          <div class="rnd-subtitle">Natural Remedies Innovation Centre · Bangalore</div>
+          <div class="rnd-stats-grid">
+            <div class="rnd-stat"><h4>500+</h4><p>Studies Conducted</p></div>
+            <div class="rnd-stat"><h4>30+</h4><p>Years Research</p></div>
+            <div class="rnd-stat"><h4>45+</h4><p>Countries Validated</p></div>
+            <div class="rnd-stat"><h4>100+</h4><p>Products Developed</p></div>
+          </div>
+          <div class="rnd-papers">
+            <a href="#" class="rnd-paper">
+              <span class="rnd-paper-icon">📄</span>
+              Phytocee — Vitamin C Alternative in Poultry
+              <span class="rnd-paper-badge">PDF</span>
+            </a>
+            <a href="#" class="rnd-paper">
+              <span class="rnd-paper-icon">📄</span>
+              Kolin Plus — Polyherbal Choline Chloride Study
+              <span class="rnd-paper-badge">PDF</span>
+            </a>
+            <a href="#" class="rnd-paper">
+              <span class="rnd-paper-icon">📄</span>
+              Coccidiosis Management in Broilers — Field Trial
+              <span class="rnd-paper-badge">PDF</span>
+            </a>
+            <a href="#" class="rnd-paper">
+              <span class="rnd-paper-icon">📄</span>
+              Non-GMO Feed Safety — Verification Protocol
+              <span class="rnd-paper-badge">PDF</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ PRODUCTS / PHYTOGENICS ══════════════ -->
+<section id="products">
+  <div class="s-inner">
+    <div class="products-header">
+      <div class="s-label reveal" style="justify-content:center;">Our Product Range</div>
+      <h2 class="reveal rd1">Phytogenic Solutions<br/><em>Backed by Science</em></h2>
+      <p class="reveal rd2">Standardized botanical powders and extracts offering a high margin of safety, consistent potency, and measurable efficacy for your livestock operation.</p>
+    </div>
+    <div class="products-grid">
+      <!-- Wide card -->
+      <div class="prod-card prod-card-wide reveal" style="background:linear-gradient(145deg,rgba(47,176,90,.15),rgba(4,27,14,.95));">
+        <div class="prod-card-header">
+          <div class="prod-icon" style="background:linear-gradient(135deg,rgba(47,176,90,.3),rgba(14,74,40,.5));">🌿</div>
+          <div>
+            <div class="prod-name">Phytogenic Feed Additives</div>
+            <div class="prod-tag">Core Range · Ruminants &amp; Monogastrics</div>
+          </div>
+        </div>
+        <div class="prod-desc">Our flagship phytogenic range — standardized botanical extracts formulated for consistent bioavailability and measurable performance gains. A natural, safe alternative to synthetic feed additives.</div>
+        <div class="prod-benefits">
+          <span class="prod-chip">Gut Health</span>
+          <span class="prod-chip">FCR Improvement</span>
+          <span class="prod-chip">Antibiotic Alternative</span>
+          <span class="prod-chip">Standardized Extracts</span>
+          <span class="prod-chip">Species-Specific</span>
+        </div>
+      </div>
+
+      <div class="prod-card reveal rd1">
+        <div class="prod-card-header">
+          <div class="prod-icon" style="background:linear-gradient(135deg,rgba(212,116,58,.25),rgba(120,50,10,.4));">🐔</div>
+          <div>
+            <div class="prod-name">Phytocee</div>
+            <div class="prod-tag">Poultry · Vitamin C Alternative</div>
+          </div>
+        </div>
+        <div class="prod-desc">Natural Vitamin C source for poultry, reducing oxidative stress and improving flock immunity under heat and disease challenge.</div>
+        <div class="prod-benefits">
+          <span class="prod-chip" style="background:rgba(212,116,58,.12);color:#f0a870;border-color:rgba(212,116,58,.3);">Immunity</span>
+          <span class="prod-chip" style="background:rgba(212,116,58,.12);color:#f0a870;border-color:rgba(212,116,58,.3);">Antioxidant</span>
+        </div>
+      </div>
+
+      <div class="prod-card reveal rd2">
+        <div class="prod-card-header">
+          <div class="prod-icon" style="background:linear-gradient(135deg,rgba(201,144,42,.25),rgba(120,80,10,.4));">⚗️</div>
+          <div>
+            <div class="prod-name">Kolin Plus</div>
+            <div class="prod-tag">Poultry · Choline Supplement</div>
+          </div>
+        </div>
+        <div class="prod-desc">Polyherbal choline chloride replacement — eliminating the hygroscopic effects of synthetic choline while supporting liver function and production.</div>
+        <div class="prod-benefits">
+          <span class="prod-chip" style="background:rgba(201,144,42,.15);color:var(--gold-light);border-color:rgba(201,144,42,.3);">Liver Support</span>
+          <span class="prod-chip" style="background:rgba(201,144,42,.15);color:var(--gold-light);border-color:rgba(201,144,42,.3);">Non-Hygroscopic</span>
+        </div>
+      </div>
+
+      <div class="prod-card reveal rd1">
+        <div class="prod-card-header">
+          <div class="prod-icon" style="background:linear-gradient(135deg,rgba(47,176,90,.25),rgba(14,74,40,.5));">🐄</div>
+          <div>
+            <div class="prod-name">Ruminant Botanicals</div>
+            <div class="prod-tag">Cattle · Dairy · Sheep · Goats</div>
+          </div>
+        </div>
+        <div class="prod-desc">Phytogenic blends to optimise rumen microbiome, improve milk yield, and support reproductive efficiency in dairy and beef herds.</div>
+        <div class="prod-benefits">
+          <span class="prod-chip">Milk Yield</span>
+          <span class="prod-chip">Rumen Health</span>
+        </div>
+      </div>
+
+      <div class="prod-card reveal rd2">
+        <div class="prod-card-header">
+          <div class="prod-icon" style="background:linear-gradient(135deg,rgba(26,96,128,.3),rgba(6,37,60,.5));">🛡️</div>
+          <div>
+            <div class="prod-name">Immunity &amp; Gut Range</div>
+            <div class="prod-tag">Broad-Spectrum · All Species</div>
+          </div>
+        </div>
+        <div class="prod-desc">Herbal immunomodulators and gut conditioners addressing coccidiosis, respiratory challenges, and dysbiosis without antibiotic resistance risk.</div>
+        <div class="prod-benefits">
+          <span class="prod-chip" style="background:rgba(26,96,128,.18);color:#7acff0;border-color:rgba(26,96,128,.3);">Coccidiosis</span>
+          <span class="prod-chip" style="background:rgba(26,96,128,.18);color:#7acff0;border-color:rgba(26,96,128,.3);">AMR-Free</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ EVENTS ══════════════ -->
+<section id="events">
+  <div class="s-inner">
+    <div class="events-header">
+      <div class="s-label reveal" style="justify-content:center;">Industry Engagement</div>
+      <h2 class="reveal rd1">Events &amp; <em>Summits</em></h2>
+      <p class="reveal rd2" style="color:var(--text-faint);font-size:15px;line-height:1.7;font-weight:300;">Connecting veterinarians, farmers, and livestock producers through education, innovation showcases, and peer learning.</p>
+    </div>
+    <div class="events-grid">
+      <!-- Featured upcoming event -->
+      <div class="event-card ec-upcoming reveal">
+        <img src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=900&q=80"
+             alt="International Farmers Summit" class="ec-photo" loading="lazy" />
+        <div class="ec-top">
+          <div class="ec-type">Upcoming Event</div>
+          <h3>International Farmers Summit 2026</h3>
+          <p>A landmark gathering of veterinarians, livestock producers, and agribusiness leaders — exploring the future of natural animal nutrition, sustainable farming, and phytogenic solutions. Featuring keynotes, live product demonstrations, and research presentations from our Innovation Centre.</p>
+        </div>
+        <div class="ec-meta">
+          <div class="ec-meta-item"><span>📅</span> 2026 · Date TBC</div>
+          <div class="ec-meta-item"><span>📍</span> India (Venue TBC)</div>
+          <div class="ec-meta-item"><span>👥</span> Open to All Stakeholders</div>
+        </div>
+      </div>
+      <!-- Sidebar past/small events -->
+      <div class="events-sidebar">
+        <div class="event-mini ec-past reveal rd1">
+          <div class="em-date">Past Event · 2025</div>
+          <h4>12th Kolkata International Poultry Fair</h4>
+          <p>Showcased latest phytogenic solutions for broilers and layers.</p>
+        </div>
+        <div class="event-mini ec-past reveal rd2">
+          <div class="em-date">Past Event · 2025</div>
+          <h4>VIV Asia — Bangkok</h4>
+          <p>Presented Phytocee and gut health portfolio to Southeast Asian markets.</p>
+        </div>
+        <div class="event-mini ec-past reveal rd3">
+          <div class="em-date">Past Event · 2024</div>
+          <h4>EuroTier — Hannover</h4>
+          <p>Natural alternatives to antibiotics in European livestock production.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ INSIGHTS / BLOGS ══════════════ -->
+<section id="insights">
+  <div class="mesh"></div>
+  <div class="s-inner">
+    <div class="insights-header">
+      <div class="s-label reveal">Blogs &amp; Insights</div>
+      <h2 class="reveal rd1">Latest <em>Knowledge</em><br/>From Our Experts</h2>
+      <p class="reveal rd2">Continuous updates on animal healthcare trends, feed safety, disease management, and the science of phytogenics — for veterinarians and producers.</p>
+    </div>
+    <div class="insights-grid">
+      <!-- Main blog -->
+      <div class="insight-card insight-card-main reveal">
+        <div class="ic-img">
+          <img src="https://images.unsplash.com/photo-1548550023-2bdb3c5beed7?auto=format&fit=crop&w=900&q=85"
+               alt="Poultry flock — coccidiosis management" loading="lazy" />
+        </div>
+        <div class="ic-body">
+          <div class="ic-cat">Poultry Care</div>
+          <h3>Managing Coccidiosis in Poultry: The Phytogenic Approach</h3>
+          <p>Coccidiosis remains one of the most economically devastating diseases in poultry. Our field trials demonstrate how standardized herbal formulations can reduce oocyst shedding and mortality without ionophore resistance risk.</p>
+          <div class="ic-meta">
+            <span>5 min read · Research Article</span>
+            <a href="#" class="ic-read">Read More →</a>
+          </div>
+        </div>
+      </div>
+      <!-- Side blogs -->
+      <div class="insight-card reveal rd1">
+        <div class="ic-img" style="height:160px;">
+          <img src="https://images.unsplash.com/photo-1563089145-599997674d42?auto=format&fit=crop&w=600&q=80"
+               alt="Feed science laboratory" loading="lazy" />
+        </div>
+        <div class="ic-body">
+          <div class="ic-cat">Feed Science</div>
+          <h3>Choline Chloride's Hygroscopic Effects &amp; Natural Alternatives</h3>
+          <p>Synthetic choline chloride degrades vitamins in premixes. Discover how Kolin Plus eliminates this problem.</p>
+          <div class="ic-meta">
+            <span>4 min read</span>
+            <a href="#" class="ic-read">Read →</a>
+          </div>
+        </div>
+      </div>
+      <div class="insight-card reveal rd2">
+        <div class="ic-img" style="height:160px;">
+          <img src="https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?auto=format&fit=crop&w=600&q=80"
+               alt="Grain and non-GMO feed crops" loading="lazy" />
+        </div>
+        <div class="ic-body">
+          <div class="ic-cat">Non-GMO</div>
+          <h3>Non-GMO Feed Certification: What Producers Need to Know</h3>
+          <p>A practical guide to verification, documentation, and market access for Non-GMO certified livestock products.</p>
+          <div class="ic-meta">
+            <span>3 min read</span>
+            <a href="#" class="ic-read">Read →</a>
+          </div>
+        </div>
+      </div>
+      <div class="insight-card reveal rd1">
+        <div class="ic-img" style="height:160px;">
+          <img src="https://images.unsplash.com/photo-1500595046743-cd271d694d30?auto=format&fit=crop&w=600&q=80"
+               alt="Dairy cattle in green pasture" loading="lazy" />
+        </div>
+        <div class="ic-body">
+          <div class="ic-cat">Dairy Health</div>
+          <h3>Improving Milk Yield with Phytogenic Rumen Modulators</h3>
+          <p>A 90-day field study across 12 dairy farms shows a 12% improvement in milk yield using our botanical blend.</p>
+          <div class="ic-meta">
+            <span>6 min read</span>
+            <a href="#" class="ic-read">Read →</a>
+          </div>
+        </div>
+      </div>
+      <div class="insight-card reveal rd2">
+        <div class="ic-img" style="height:160px;">
+          <img src="https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&w=600&q=80"
+               alt="Microscope research transcriptome analysis" loading="lazy" />
+        </div>
+        <div class="ic-body">
+          <div class="ic-cat">Research</div>
+          <h3>Transcriptome Analysis: Unlocking Herbal Mode of Action</h3>
+          <p>How gene-expression profiling is helping us understand exactly how phytogenics modulate immune response.</p>
+          <div class="ic-meta">
+            <span>7 min read</span>
+            <a href="#" class="ic-read">Read →</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ GLOBAL REACH ══════════════ -->
+<section id="global">
+  <div class="s-inner">
+    <div class="global-inner">
+      <div class="global-text">
+        <div class="s-label reveal">Global Presence</div>
+        <h2 class="reveal rd1">Trusted by Farmers<br/>Across <em>45+ Countries</em></h2>
+        <p class="reveal rd2">From India to Europe, from Southeast Asia to the Americas — our products and solutions have proven their worth in diverse climates, farming systems, and regulatory environments.</p>
+        <p class="reveal rd3">Our vast global logistics and distribution network ensures that veterinarians and livestock producers receive consistent-quality phytogenic solutions wherever they farm.</p>
+        <div class="global-stats">
+          <div class="gs-item reveal rd1">
+            <h3 id="gc1">0+</h3><p>Countries</p>
+          </div>
+          <div class="gs-item reveal rd2">
+            <h3 id="gc2">0+</h3><p>Years Experience</p>
+          </div>
+          <div class="gs-item reveal rd3">
+            <h3 id="gc3">0</h3><p>Languages</p>
+          </div>
+        </div>
+      </div>
+      <div class="globe-visual reveal rd1">
+        <div class="globe-ring gr1"></div>
+        <div class="globe-ring gr2"></div>
+        <div class="globe-ring gr3"></div>
+        <div class="globe-center">🌍</div>
+        <div class="globe-dot gd1"></div>
+        <div class="globe-dot gd2"></div>
+        <div class="globe-dot gd3"></div>
+        <div class="globe-dot gd4"></div>
+        <div class="globe-dot gd5"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ SISTER VERTICALS ══════════════ -->
+<section id="verticals">
+  <div class="mesh"></div>
+  <div class="s-inner">
+    <div class="vert-header">
+      <div class="s-label reveal" style="justify-content:center;">Our Ecosystem</div>
+      <h2 class="reveal rd1">Natural Solutions Across<br/><em>Every Living Species</em></h2>
+    </div>
+    <div class="vert-grid">
+      <div class="vert-card vert-animal reveal">
+        <span class="vert-icon">🐄</span>
+        <h3>Animal Healthcare</h3>
+        <p>Our core vertical — phytogenic solutions for ruminants and monogastrics, developed at our world-class Innovation Centre in Bangalore.</p>
+        <a href="#focus" class="vert-link">Explore Solutions →</a>
+      </div>
+      <div class="vert-card vert-human reveal rd1">
+        <span class="vert-icon">💊</span>
+        <h3>Human Healthcare</h3>
+        <p>An allied branch delivering natural human healthcare solutions rooted in the same Ayurvedic science and botanical expertise that defines our animal health range.</p>
+        <a href="#" class="vert-link">Visit Human Health →</a>
+      </div>
+      <div class="vert-card vert-pet reveal rd2">
+        <span class="vert-icon">🐾</span>
+        <h3>Pet Care</h3>
+        <p>Holistic and natural products for companion animals — bringing the same rigorous phytogenic science to pet wellness for dogs, cats, and small animals.</p>
+        <a href="#" class="vert-link">Discover Pet Care →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ TESTIMONIALS ══════════════ -->
+<section id="testimonials">
+  <div class="s-inner" style="padding-bottom:60px;">
+    <div class="testi-header">
+      <div class="s-label reveal" style="justify-content:center;">What They Say</div>
+      <h2 class="reveal rd1">Trusted by Veterinarians<br/>&amp; <em>Livestock Producers</em></h2>
+    </div>
+  </div>
+  <div style="overflow:hidden;">
+    <div class="testi-track" id="ttrack">
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"Phytocee has reduced mortality in our broiler flocks by 18% over two production cycles. The science behind it is solid."</blockquote><div class="t-author"><div class="t-avatar">👨‍⚕️</div><div><div class="t-name">Dr. Rajesh Menon</div><div class="t-role">Poultry Veterinarian · Kerala, India</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"The Ruminant Botanical blend improved milk yield in our Holstein herd by 11%. Our farmers couldn't believe the difference."</blockquote><div class="t-author"><div class="t-avatar">👩‍🌾</div><div><div class="t-name">Maria Santos</div><div class="t-role">Dairy Farm Manager · São Paulo, Brazil</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"Switching from synthetic choline to Kolin Plus eliminated premix degradation issues entirely. Game-changer for our feed mill."</blockquote><div class="t-author"><div class="t-avatar">🧑‍🔬</div><div><div class="t-name">Dr. Ahmed Al-Rashidi</div><div class="t-role">Feed Mill Nutritionist · Riyadh, KSA</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"In 25 years of practice I've not seen a phytogenic company with this level of R&D rigour. Their case studies are exemplary."</blockquote><div class="t-author"><div class="t-avatar">👴</div><div><div class="t-name">Prof. Jan Verwijk</div><div class="t-role">Animal Nutritionist · Wageningen, Netherlands</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"Our coccidiosis challenge has reduced by 60% since adopting their herbal gut health protocol. No ionophore resistance concerns."</blockquote><div class="t-author"><div class="t-avatar">👩‍⚕️</div><div><div class="t-name">Dr. Sunita Patel</div><div class="t-role">Flock Health Specialist · Gujarat, India</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"Consistently excellent customer support and technical advice. The team at Natural Remedies truly understands farming realities."</blockquote><div class="t-author"><div class="t-avatar">🧔</div><div><div class="t-name">Carlos Muñoz</div><div class="t-role">Livestock Producer · Jalisco, Mexico</div></div></div></div>
+      <!-- Duplicate for loop -->
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"Phytocee has reduced mortality in our broiler flocks by 18% over two production cycles. The science behind it is solid."</blockquote><div class="t-author"><div class="t-avatar">👨‍⚕️</div><div><div class="t-name">Dr. Rajesh Menon</div><div class="t-role">Poultry Veterinarian · Kerala, India</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"The Ruminant Botanical blend improved milk yield in our Holstein herd by 11%. Our farmers couldn't believe the difference."</blockquote><div class="t-author"><div class="t-avatar">👩‍🌾</div><div><div class="t-name">Maria Santos</div><div class="t-role">Dairy Farm Manager · São Paulo, Brazil</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"Switching from synthetic choline to Kolin Plus eliminated premix degradation issues entirely. Game-changer for our feed mill."</blockquote><div class="t-author"><div class="t-avatar">🧑‍🔬</div><div><div class="t-name">Dr. Ahmed Al-Rashidi</div><div class="t-role">Feed Mill Nutritionist · Riyadh, KSA</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"In 25 years of practice I've not seen a phytogenic company with this level of R&D rigour. Their case studies are exemplary."</blockquote><div class="t-author"><div class="t-avatar">👴</div><div><div class="t-name">Prof. Jan Verwijk</div><div class="t-role">Animal Nutritionist · Wageningen, Netherlands</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"Our coccidiosis challenge has reduced by 60% since adopting their herbal gut health protocol. No ionophore resistance concerns."</blockquote><div class="t-author"><div class="t-avatar">👩‍⚕️</div><div><div class="t-name">Dr. Sunita Patel</div><div class="t-role">Flock Health Specialist · Gujarat, India</div></div></div></div>
+      <div class="t-card"><div class="t-stars">★★★★★</div><blockquote>"Consistently excellent customer support and technical advice. The team at Natural Remedies truly understands farming realities."</blockquote><div class="t-author"><div class="t-avatar">🧔</div><div><div class="t-name">Carlos Muñoz</div><div class="t-role">Livestock Producer · Jalisco, Mexico</div></div></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ CONTACT FORM ══════════════ -->
+<section id="contact">
+  <div class="mesh"></div>
+  <div class="s-inner">
+    <div class="contact-inner">
+      <div class="contact-info">
+        <div class="s-label reveal">Get In Touch</div>
+        <h2 class="reveal rd1">Connect With<br/>Our <em>Expert Team</em></h2>
+        <p class="reveal rd2">Whether you're a veterinarian seeking technical guidance, a producer looking for solutions, or a distributor interested in partnership — our team is ready to support you.</p>
+        <div class="contact-detail reveal rd2">
+          <div class="cd-icon">🏢</div>
+          <div>
+            <div class="cd-label">Corporate Headquarters</div>
+            <div class="cd-value">Electronic City, Bangalore<br/>Karnataka, India</div>
+          </div>
+        </div>
+        <div class="contact-detail reveal rd3">
+          <div class="cd-icon">🏭</div>
+          <div>
+            <div class="cd-label">Manufacturing Facilities</div>
+            <div class="cd-value">Krishnagiri District, Tamil Nadu<br/>Pithampur, Dhar District, Madhya Pradesh</div>
+          </div>
+        </div>
+        <div class="contact-detail reveal rd3">
+          <div class="cd-icon">🌐</div>
+          <div>
+            <div class="cd-label">Global Distribution</div>
+            <div class="cd-value">45+ Countries Worldwide<br/>20+ Languages Supported</div>
+          </div>
+        </div>
+        <div class="contact-detail reveal rd4">
+          <div class="cd-icon">📱</div>
+          <div>
+            <div class="cd-label">Follow Us</div>
+            <div class="cd-value" style="display:flex;gap:10px;margin-top:4px;">
+              <a href="#" class="f-social" style="color:var(--white);">📘</a>
+              <a href="#" class="f-social" style="color:var(--white);">in</a>
+              <a href="#" class="f-social" style="color:var(--white);">▶</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTACT FORM (Google Sheets ready) -->
+      <div class="contact-form-wrap reveal rd1">
+        <h3>Send Us a Message</h3>
+        <p class="form-sub">Fill in your details and our team will respond within 24 hours.</p>
+        <div class="form-toast" id="form-toast"></div>
+        <form id="contact-form" novalidate>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-firstName">First Name *</label>
+              <input id="f-firstName" type="text" name="firstName" placeholder="Dr. Rajesh" required />
+            </div>
+            <div class="form-group">
+              <label for="f-lastName">Last Name *</label>
+              <input id="f-lastName" type="text" name="lastName" placeholder="Kumar" required />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="f-email">Email Address *</label>
+            <input id="f-email" type="email" name="email" placeholder="your@email.com" required />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="f-phone">Phone Number</label>
+              <input id="f-phone" type="tel" name="phone" placeholder="+91 9876543210" />
+            </div>
+            <div class="form-group">
+              <label for="f-country">Country</label>
+              <input id="f-country" type="text" name="country" placeholder="India" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="f-role">I Am A *</label>
+            <select id="f-role" name="role" required>
+              <option value="" disabled selected>Select your role</option>
+              <option value="Veterinarian">Veterinarian</option>
+              <option value="Livestock Producer">Livestock Producer</option>
+              <option value="Distributor / Dealer">Distributor / Dealer</option>
+              <option value="Feed Mill">Feed Mill</option>
+              <option value="Researcher">Researcher / Academician</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="f-interest">Area of Interest</label>
+            <select id="f-interest" name="interest">
+              <option value="" disabled selected>Select product/topic</option>
+              <option value="Ruminants">Ruminant Products</option>
+              <option value="Monogastrics">Monogastric / Poultry Products</option>
+              <option value="Phytocee">Phytocee</option>
+              <option value="Kolin Plus">Kolin Plus</option>
+              <option value="R&D Collaboration">R&D Collaboration</option>
+              <option value="Distributorship">Distributorship / Partnership</option>
+              <option value="General Enquiry">General Enquiry</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="f-message">Message *</label>
+            <textarea id="f-message" name="message" rows="4" placeholder="Tell us about your farm, challenge, or enquiry..." required></textarea>
+          </div>
+          <!-- Hidden metadata fields -->
+          <input type="hidden" name="submittedAt" id="submittedAt" />
+          <input type="hidden" name="source" value="Landing Page — naturalremedies.com" />
+          <button type="submit" class="form-submit" id="form-btn">
+            Send Message →
+          </button>
+          <p class="form-note">🔒 Your information is secure and will never be shared. By submitting you agree to our Privacy Policy.</p>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════ FOOTER ══════════════ -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#">
+        <img src="https://www.naturalremedy.com/wp-content/uploads/2025/08/NR-New-logo-r.webp"
+             alt="Natural Remedies" class="footer-logo-img" />
+      </a>
+      <p>Pioneering natural, science-backed animal health solutions for veterinarians and livestock producers across 45+ countries for over three decades.</p>
+      <div class="footer-socials">
+        <a href="#" class="f-social">📘</a>
+        <a href="#" class="f-social">in</a>
+        <a href="#" class="f-social">▶</a>
+      </div>
+      <div class="footer-locations" style="margin-top:22px;">
+        <strong>Headquarters</strong>
+        Electronic City, Bangalore, Karnataka, India
+        <strong style="margin-top:12px;">Factories</strong>
+        Krishnagiri, Tamil Nadu &amp; Pithampur, Madhya Pradesh
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>Products</h5>
+      <ul>
+        <li><a href="#">Ruminant Solutions</a></li>
+        <li><a href="#">Monogastric Solutions</a></li>
+        <li><a href="#">Phytocee</a></li>
+        <li><a href="#">Kolin Plus</a></li>
+        <li><a href="#">Gut Health Range</a></li>
+        <li><a href="#">Immunity Support</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Company</h5>
+      <ul>
+        <li><a href="#">About Us</a></li>
+        <li><a href="#">Innovation Centre</a></li>
+        <li><a href="#">Sustainability</a></li>
+        <li><a href="#">Our Expertise</a></li>
+        <li><a href="#">Careers</a></li>
+        <li><a href="#">Press &amp; Media</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Resources</h5>
+      <ul>
+        <li><a href="#">Research Bulletins</a></li>
+        <li><a href="#">Technical Case Studies</a></li>
+        <li><a href="#">Research Articles</a></li>
+        <li><a href="#">Blogs &amp; Insights</a></li>
+        <li><a href="#">Events</a></li>
+        <li><a href="#">FAQ</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Support</h5>
+      <ul>
+        <li><a href="#">Contact Us</a></li>
+        <li><a href="#">Customer Support</a></li>
+        <li><a href="#">Find a Distributor</a></li>
+        <li><a href="#">Wholesale / B2B</a></li>
+        <li><a href="#">Privacy Policy</a></li>
+        <li><a href="#">Disclaimer</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2026 Natural Remedies Pvt. Ltd. All rights reserved. · Electronic City, Bangalore, India</span>
+    <span>
+      <a href="#">Customer Support</a> &nbsp;·&nbsp;
+      <a href="#">Privacy Policy</a> &nbsp;·&nbsp;
+      <a href="#">Disclaimer</a>
+    </span>
+  </div>
+</footer>
+
+<!-- ══════════════ SCRIPTS ══════════════ -->
+<script>
+  gsap.registerPlugin(ScrollTrigger);
+
+  /* ─── LOADER ─── */
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      gsap.to('#loader', {
+        opacity:0, duration:.7, ease:'power2.inOut',
+        onComplete: () => { document.getElementById('loader').style.display='none'; }
+      });
+      heroEntrance();
+    }, 2800);
+  });
+
+  /* ─── HERO ENTRANCE ─── */
+  function heroEntrance() {
+    gsap.set(['#hbadge','#hh1','#htagline','#hsub','#hactions','#hstats'], { y:44 });
+    gsap.timeline({ defaults:{ ease:'power4.out' } })
+      .to('#hbadge',   { opacity:1, y:0, duration:.8, delay:.1 })
+      .to('#hh1',      { opacity:1, y:0, duration:1  }, '-=.5')
+      .to('#htagline', { opacity:1, y:0, duration:.7 }, '-=.5')
+      .to('#hsub',     { opacity:1, y:0, duration:.8 }, '-=.55')
+      .to('#hactions', { opacity:1, y:0, duration:.7 }, '-=.5')
+      .to('#hstats',   { opacity:1, y:0, duration:.7 }, '-=.4');
+    animateCounters();
+  }
+
+  /* ─── COUNTERS ─── */
+  function runCounter(c) {
+    const el = document.getElementById(c.id);
+    if (!el) return;
+    let cur = 0, step = c.to / 55;
+    const iv = setInterval(() => {
+      cur = Math.min(cur + step, c.to);
+      el.textContent = Math.round(cur) + c.suffix;
+      if (cur >= c.to) clearInterval(iv);
+    }, 28);
+  }
+
+  function animateCounters() {
+    const heroCs = [
+      { id:'sc1', to:30,  suffix:'+' },
+      { id:'sc2', to:45,  suffix:'+' },
+      { id:'sc3', to:100, suffix:'+' },
+      { id:'sc4', to:20,  suffix:''  },
+    ];
+    setTimeout(() => heroCs.forEach(runCounter), 900);
+
+    // Global section counters fire on scroll into view
+    const globalCs = [
+      { id:'gc1', to:45, suffix:'+' },
+      { id:'gc2', to:30, suffix:'+' },
+      { id:'gc3', to:20, suffix:''  },
+    ];
+    let gcDone = false;
+    const gcObs = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && !gcDone) {
+        gcDone = true;
+        globalCs.forEach(runCounter);
+        gcObs.disconnect();
+      }
+    }, { threshold: 0.3 });
+    const globalSection = document.getElementById('global');
+    if (globalSection) gcObs.observe(globalSection);
+  }
+
+  /* ─── CURSOR ─── */
+  const cur  = document.getElementById('cursor');
+  const ring = document.getElementById('cursor-ring');
+  document.addEventListener('mousemove', e => {
+    cur.style.transform  = `translate(${e.clientX - 5}px, ${e.clientY - 5}px)`;
+    ring.style.transform = `translate(${e.clientX - 17}px, ${e.clientY - 17}px)`;
+  });
+  document.querySelectorAll('a, button, .focus-card, .prod-card, .pillar, .t-card, .event-card, .insight-card').forEach(el => {
+    el.addEventListener('mouseenter', () => { ring.style.width='50px'; ring.style.height='50px'; ring.style.borderColor='rgba(201,144,42,.8)'; });
+    el.addEventListener('mouseleave', () => { ring.style.width='34px'; ring.style.height='34px'; ring.style.borderColor='rgba(201,144,42,.55)'; });
+  });
+
+  /* ─── NAV SCROLL ─── */
+  const nb = document.getElementById('navbar');
+  window.addEventListener('scroll', () => {
+    nb.classList.toggle('scrolled', window.scrollY > 80);
+    nb.style.top = window.scrollY > 80 ? '0' : '36px';
+  });
+
+  /* ─── SCROLL REVEAL ─── */
+  const ro = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+  /* ─── GSAP SCROLL ─── */
+  gsap.utils.toArray('.focus-card').forEach((c, i) => {
+    gsap.fromTo(c,
+      { opacity:0, y:60, rotateX:8 },
+      { opacity:1, y:0, rotateX:0, duration:.9, ease:'power3.out', delay:i*.1,
+        scrollTrigger:{ trigger:c, start:'top 86%' } });
+  });
+
+  gsap.to('.hero-spline', {
+    y:70, ease:'none',
+    scrollTrigger:{ trigger:'#hero', start:'top top', end:'bottom top', scrub:1.2 }
+  });
+
+  gsap.to('.av-main', {
+    y:-36, ease:'none',
+    scrollTrigger:{ trigger:'#about', start:'top bottom', end:'bottom top', scrub:1.5 }
+  });
+
+  /* ─── 3D TILT ─── */
+  function addTilt(selector, strength) {
+    document.querySelectorAll(selector).forEach(el => {
+      el.addEventListener('mousemove', e => {
+        const r = el.getBoundingClientRect();
+        const x = (e.clientX - r.left) / r.width  - 0.5;
+        const y = (e.clientY - r.top)  / r.height - 0.5;
+        el.style.transform = `perspective(900px) rotateY(${x*strength}deg) rotateX(${-y*strength*.8}deg) translateY(-8px)`;
+      });
+      el.addEventListener('mouseleave', () => { el.style.transform = ''; });
+    });
+  }
+  addTilt('.focus-card', 12);
+  addTilt('.prod-card',  10);
+  addTilt('.vert-card',  10);
+  addTilt('.t-card',      7);
+
+  /* 3D about card */
+  const av3d = document.getElementById('av3d');
+  if (av3d) {
+    av3d.addEventListener('mousemove', e => {
+      const r = av3d.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      av3d.style.transform = `perspective(1200px) rotateY(${x*22}deg) rotateX(${-y*16}deg)`;
+    });
+    av3d.addEventListener('mouseleave', () => {
+      av3d.style.transform = 'perspective(1200px) rotateY(8deg) rotateX(-3deg)';
+    });
+  }
+
+  /* ─── THREE.JS PARTICLES ─── */
+  (function() {
+    const canvas   = document.getElementById('three-canvas');
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const scene  = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(75, innerWidth/innerHeight, 0.1, 1000);
+    camera.position.z = 5;
+    function resize() {
+      renderer.setSize(innerWidth, innerHeight);
+      camera.aspect = innerWidth/innerHeight;
+      camera.updateProjectionMatrix();
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function makeParticles(count, color, spread) {
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(count * 3);
+      for (let i = 0; i < count; i++) {
+        pos[i*3]   = (Math.random()-.5)*spread;
+        pos[i*3+1] = (Math.random()-.5)*spread;
+        pos[i*3+2] = (Math.random()-.5)*spread*.5;
+      }
+      geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+      const mat = new THREE.PointsMaterial({ color, size:.04, transparent:true, opacity:.5, sizeAttenuation:true, blending:THREE.AdditiveBlending, depthWrite:false });
+      const pts = new THREE.Points(geo, mat);
+      scene.add(pts);
+      return pts;
+    }
+
+    const p1 = makeParticles(1600, 0x2fb05a, 20);
+    const p2 = makeParticles(350,  0xc9902a, 18);
+    let mx = 0, my = 0;
+    document.addEventListener('mousemove', e => {
+      mx = (e.clientX/innerWidth -.5)*.28;
+      my = (e.clientY/innerHeight-.5)*.28;
+    });
+
+    let t = 0;
+    (function animate() {
+      requestAnimationFrame(animate);
+      t += .0025;
+      p1.rotation.y = t*.07 + mx;
+      p1.rotation.x = t*.04 + my;
+      p2.rotation.y = -t*.05 + mx*.6;
+      p2.rotation.x = -t*.03 + my*.6;
+      const a = p1.geometry.attributes.position.array;
+      for (let i = 0; i < 1600; i++) a[i*3+1] += Math.sin(t + i*.12) * .0008;
+      p1.geometry.attributes.position.needsUpdate = true;
+      renderer.render(scene, camera);
+    })();
+  })();
+
+  /* ─── SMOOTH SCROLL ─── */
+  document.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', e => {
+      e.preventDefault();
+      const id = a.getAttribute('href');
+      if (id === '#') { window.scrollTo({ top:0, behavior:'smooth' }); return; }
+      const t = document.querySelector(id);
+      if (t) window.scrollTo({ top: t.getBoundingClientRect().top + window.scrollY - 88, behavior:'smooth' });
+    });
+  });
+
+  /* ─── CONTACT FORM → GOOGLE SHEETS ─── */
+  const SHEETS_URL = 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE';
+
+  const form    = document.getElementById('contact-form');
+  const btn     = document.getElementById('form-btn');
+  const toast   = document.getElementById('form-toast');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    // Set timestamp
+    document.getElementById('submittedAt').value = new Date().toISOString();
+
+    // Validate
+    const required = form.querySelectorAll('[required]');
+    let valid = true;
+    required.forEach(f => {
+      if (!f.value.trim()) { f.style.borderColor='rgba(212,74,74,.6)'; valid=false; }
+      else                  { f.style.borderColor=''; }
+    });
+    if (!valid) {
+      showToast('Please fill in all required fields.', 'error');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Sending…';
+
+    const data = Object.fromEntries(new FormData(form));
+
+    try {
+      await fetch(SHEETS_URL, {
+        method: 'POST',
+        mode:   'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body:   JSON.stringify(data)
+      });
+      showToast('✓ Message sent! Our team will be in touch within 24 hours.', 'success');
+      form.reset();
+    } catch(err) {
+      showToast('Something went wrong. Please email us directly.', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Send Message →';
+    }
+  });
+
+  function showToast(msg, type) {
+    toast.textContent = msg;
+    toast.className   = 'form-toast ' + type;
+    setTimeout(() => { toast.className = 'form-toast'; }, 6000);
+  }
+
+  /* ─── HAMBURGER MENU ─── */
+  const burger   = document.getElementById('nav-burger');
+  const navLinks = document.querySelector('.nav-links');
+  burger.addEventListener('click', () => {
+    burger.classList.toggle('active');
+    navLinks.classList.toggle('mobile-open');
+    document.body.style.overflow = navLinks.classList.contains('mobile-open') ? 'hidden' : '';
+  });
+  // Close menu when any nav link is clicked
+  navLinks.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      burger.classList.remove('active');
+      navLinks.classList.remove('mobile-open');
+      document.body.style.overflow = '';
+    });
+  });
+
+  /* Page fade in */
+  document.body.style.opacity = '0';
+  requestAnimationFrame(() => {
+    document.body.style.transition = 'opacity .45s ease';
+    document.body.style.opacity    = '1';
+  });
+</script>
+</body>
+</html>
